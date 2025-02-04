@@ -25,7 +25,18 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Getters et Setters manuels
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Getters et Setters
     public Long getId() {
         return id;
     }
