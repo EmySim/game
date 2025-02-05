@@ -6,8 +6,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class ChatopBackApplication {
+	private static int mainExecutionCount = 0; // Compteur d'exécutions
 
 	public static void main(String[] args) {
+		mainExecutionCount++;
+		System.out.println("Exécution de ChatopBackApplication#main fois : " + mainExecutionCount);
+
+
 		// Charger les variables d'environnement depuis le fichier `.env`
 		Dotenv dotenv = Dotenv.configure()
 				.directory("./") // Spécifie l'emplacement du fichier .env (racine du projet)
@@ -19,7 +24,7 @@ public class ChatopBackApplication {
 		String jwtSecret = dotenv.get("JWT_SECRET");
 
 		// Afficher les variables chargées pour confirmation
-		System.out.println("### Variables d'environnement chargées ###");
+		System.out.println("### Variables d'environnement chargées ⊂(◉‿◉)つ ###");
 		System.out.println("DATABASE_URL = " + databaseUrl);
 		System.out.println("DATABASE_USERNAME = " + databaseUsername);
 		System.out.println("JWT_SECRET = " + jwtSecret);
@@ -36,7 +41,7 @@ public class ChatopBackApplication {
 		System.setProperty("spring.datasource.password", databasePassword);
 
 		// Afficher les variables chargées pour débogage
-		System.out.println("### Variables d'environnement chargées ###");
+		System.out.println("### (ㆆ _ ㆆ) Variables d'environnement chargées  ###");
 		System.out.println("DATABASE_URL = " + databaseUrl);
 		System.out.println("DATABASE_USERNAME = " + databaseUsername);
 		System.out.println("JWT_SECRET = " + jwtSecret);
