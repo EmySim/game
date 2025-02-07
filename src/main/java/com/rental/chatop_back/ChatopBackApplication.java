@@ -6,12 +6,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class ChatopBackApplication {
-	private static int mainExecutionCount = 0; // Compteur d'exécutions
-
 	public static void main(String[] args) {
-		mainExecutionCount++;
-		System.out.println("Exécution de ChatopBackApplication#main fois : " + mainExecutionCount);
-
 
 		// Charger les variables d'environnement depuis le fichier `.env`
 		Dotenv dotenv = Dotenv.configure()
@@ -63,14 +58,12 @@ public class ChatopBackApplication {
 	 * Méthode pour vérifier qu'une variable d'environnement est bien définie et non vide.
 	 * Si une variable est absente ou vide, le programme s'arrête.
 	 *
-	 * @param varName  Nom de la variable (pour l'affichage dans l'erreur).
-	 * @param varValue Valeur de la variable à vérifier.
+	 * @param variableName  Nom de la variable (pour l'affichage dans l'erreur).
+	 * @param variableValue Valeur de la variable à vérifier.
 	 */
-	private static void verifyEnvironmentVariable(String varName, String varValue) {
-		if (varValue == null || varValue.isEmpty()) {
-			System.err.println("ERREUR CRITIQUE : La variable d'environnement `" + varName + "` est manquante ou vide !");
-			System.err.println("Veuillez définir `" + varName + "` dans votre fichier `.env` ou dans les variables d'environnement.");
-			System.exit(1); // Arrête l'exécution avec un code d'erreur
+	private static void verifyEnvironmentVariable(String variableName, String variableValue) {
+		if (variableValue == null || variableValue.isEmpty()) {
+			throw new IllegalStateException("ERREUR : La variable d'environnement '" + variableName + "' est manquante ou vide. Veuillez la configurer correctement !");
 		}
 	}
 }
