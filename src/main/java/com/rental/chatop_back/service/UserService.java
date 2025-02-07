@@ -2,42 +2,41 @@ package com.rental.chatop_back.service;
 
 import com.rental.chatop_back.model.User;
 import com.rental.chatop_back.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 @Service
 public class UserService {
 
+    private static final String EMAIL_ALREADY_USED_ERROR = "Cet email est déjà utilisé.";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Injection des dépendances via le constructeur
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Méthode d'enregistrement de l'utilisateur
-    public User register(User user) {
-        // Vérification si l'email est déjà utilisé
-        Optional<User> existingUser = findByEmail(user.getEmail());
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Cet email est déjà utilisé.");
-        }
-
-        // Encodage du mot de passe avant de sauvegarder l'utilisateur
+    public void register(User user) {
+        validateEmailUniqueness(user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // Sauvegarde de l'utilisateur dans la base de données
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
-    // Méthode pour rechercher un utilisateur par son email
+    private void validateEmailUniqueness(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException(EMAIL_ALREADY_USED_ERROR);
+        }
+    }
+
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 }
+
+
