@@ -1,10 +1,5 @@
 package com.rental.chatop_back.service;
 
-<<<<<<< HEAD
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-=======
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,25 +7,14 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
->>>>>>> Refactor/security
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-<<<<<<< HEAD
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-=======
->>>>>>> Refactor/security
 
 @Service
 public class JwtService {
 
-<<<<<<< HEAD
-    private static final String SECRET_KEY = "JWT_SECRET2025!";
-
-    private Key getSigningKey() {
-=======
     // Charger les variables d'environnement avec Dotenv
     private static final Dotenv dotenv = Dotenv.load();
 
@@ -41,7 +25,6 @@ public class JwtService {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
->>>>>>> Refactor/security
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
