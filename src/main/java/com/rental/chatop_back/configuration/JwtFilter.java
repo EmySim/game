@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -28,10 +29,26 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    // Liste des endpoints publics (à exclure du filtre JWT)
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/api/auth/register",
+            "/api/auth/email",
+            "/api/auth/login"
+    );
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+
+        // Si la requête est pour un endpoint public, on passe directement au filtre suivant
+        if (PUBLIC_ENDPOINTS.contains(requestURI)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = extractToken(request);
 
         if (token == null) {
