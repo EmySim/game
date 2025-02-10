@@ -11,9 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.logging.Logger;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private static final String BEARER_PREFIX = "Bearer ";
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
+    private static final String BEARER_PREFIX = "Bearer ";
 
     @Autowired
     private JwtService jwtService;
@@ -31,15 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    // Liste des endpoints publics (à exclure du filtre JWT)
+    // Liste des endpoints publics
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/",                      // La racine de l'application
-            "/auth/register",         // Pour création d'un compte
-            "/auth/login",            // Pour login
-            "/swagger-ui.html",       // Swagger UI
-            "/v3/api-docs",           // OpenAPI specs
-            "/swagger-resources",     // Swagger resources
-            "/webjars/swagger-ui/"    // Swagger static resources
+            "/", "/auth/register", "/auth/email", "/swagger-ui.html", "/v3/api-docs",
+            "/swagger-resources", "/webjars/swagger-ui/", "/favicon.ico"
     );
 
     @Override
@@ -49,55 +45,47 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        logger.info("Requête entrante : " + requestURI);
+        logger.info("➡ Requête entrante : " + requestURI);
 
-        // Ignorer les endpoints publics définis dans PUBLIC_ENDPOINTS
+        // Vérification des endpoints publics
         if (isPublicEndpoint(requestURI)) {
-            logger.info("Endpoint public détecté : " + requestURI + ". Aucun token JWT requis.");
+            logger.info("Endpoint public : " + requestURI + " (Filtrage JWT ignoré)");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extraction du token JWT
+        // Extraction et validation du token JWT
         String token = extractToken(request);
         if (token == null) {
-            logger.warning("Aucun token trouvé dans l'en-tête Authorization pour la requête sur : " + requestURI);
-            // Continuer sans définir de contexte d'authentification
-            filterChain.doFilter(request, response);
+            logger.warning("Aucun token trouvé dans l'en-tête Authorization pour la requête : " + requestURI);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "JWT manquant ou invalide");
             return;
         }
 
         try {
-            logger.info("Token trouvé, validation en cours...");
-            // Extraire le nom d'utilisateur du token
+            logger.info("Vérification du token JWT..."+ requestURI);
             String username = jwtService.extractUsername(token);
             logger.info("Nom d'utilisateur extrait du token : " + username);
 
-            // Vérifier si l'utilisateur n'est pas déjà authentifié
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Authentifier l'utilisateur
-                authenticateUser(token, username, request, response, filterChain);
-            } else {
-                logger.warning("L'utilisateur est déjà authentifié ou le nom d'utilisateur est nul.");
-                filterChain.doFilter(request, response);
+                authenticateUser(token, username, request);
             }
+
         } catch (Exception e) {
             logger.severe("Erreur lors de la validation du token : " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Unauthorized: " + e.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT invalide ou expiré");
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
 
-    /**
-     * Vérifie si la requête concerne un endpoint public.
-     */
+    // Vérifie si l'URL fait partie des endpoints publics
     private boolean isPublicEndpoint(String requestURI) {
         return PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::startsWith);
     }
 
-    /**
-     * Extraction du token JWT depuis l'en-tête Authorization.
-     */
+    // Extrait le token JWT du header Authorization
     private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
@@ -106,40 +94,23 @@ public class JwtFilter extends OncePerRequestFilter {
         return null;
     }
 
-    /**
-     * Authentifie l'utilisateur à partir du token JWT et le place dans le SecurityContext.
-     */
-    private void authenticateUser(String token, String username, HttpServletRequest request,
-                                  HttpServletResponse response, FilterChain filterChain)
-            throws IOException, ServletException {
+    // Authentifie l'utilisateur en utilisant le token JWT et le nom d'utilisateur
+    private void authenticateUser(String token, String username, HttpServletRequest request) {
+        logger.info("Authentification de l'utilisateur : " + username);
 
-        logger.info("Tentative d'authentification pour l'utilisateur : " + username);
-
-        // Charger les détails de l'utilisateur
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        logger.info("Détails de l'utilisateur chargés : " + userDetails.getUsername());
 
         // Validation du token
-        try {
-            jwtService.validateToken(token, userDetails);
-            logger.info("Token validé avec succès pour l'utilisateur : " + username);
-        } catch (IllegalArgumentException e) {
-            logger.severe("Token invalide ou expiré : " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Unauthorized: " + e.getMessage());
-            return;
+        if (jwtService.validateToken(token, userDetails)) {
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            // Définir l'authentification dans le contexte de sécurité
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            logger.info("Utilisateur authentifié avec succès : " + username);
+        } else {
+            logger.warning("Le token JWT n'est pas valide pour l'utilisateur : " + username);
         }
-
-        // Créer un objet d'authentification
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        // Stocker l'authentification dans le contexte de sécurité
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        logger.info("Utilisateur authentifié et ajouté au SecurityContext : " + username);
-
-        // Continuer la chaîne de filtres
-        filterChain.doFilter(request, response);
     }
 }

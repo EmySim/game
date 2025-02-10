@@ -33,7 +33,7 @@ public class AuthController {
         return ResponseEntity.ok("Utilisateur créé !");
     }
 
-    @PostMapping("/login")
+    @PostMapping("/email")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
             authenticationManager.authenticate(

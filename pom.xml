@@ -126,7 +126,7 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-    </dependencies>
+
 
     <!-- Springdoc OpenAPI pour Swagger -->
     <dependency>
@@ -135,7 +135,7 @@
         <version>2.2.0</version>
     </dependency>
 
-
+    </dependencies>
 
     <build>
         <plugins>

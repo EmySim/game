@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+    private static final Logger LOGGER = Logger.getLogger(UserDetailsServiceImpl.class.getName());
 
     private final UserRepository userRepository;
 
@@ -29,20 +31,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Recherche de l'utilisateur dans la base de données
+        LOGGER.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
+
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
+            LOGGER.warning("❌ Utilisateur non trouvé avec l'email : " + email);
             throw new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email);
         }
 
-        // Récupération de l'utilisateur
         User user = optionalUser.get();
+        LOGGER.info("✅ Utilisateur trouvé : " + user.getEmail());
 
-        // Retourne un UserDetails avec l'email (username), le mot de passe et les rôles
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.emptyList() // Pas de rôles dans cet exemple (ajouter si nécessaire)
+                Collections.emptyList() // Pas de rôles dans cet exemple
         );
     }
 }

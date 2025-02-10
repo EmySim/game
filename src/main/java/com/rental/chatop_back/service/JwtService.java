@@ -11,25 +11,39 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @Service
 public class JwtService {
+
+    private static final Logger LOGGER = Logger.getLogger(JwtService.class.getName());
 
     // Charger les variables d'environnement avec Dotenv
     private static final Dotenv dotenv = Dotenv.load();
 
     // Clé secrète chargée depuis les variables d'environnement
-    private static final String SECRET_KEY = dotenv.get("JWT_SECRET"); // Remplacement par JWT_SECRET
+    private static final String SECRET_KEY;
 
+    static {
+        SECRET_KEY = dotenv.get("JWT_SECRET");
+        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
+            LOGGER.severe("❌ JWT_SECRET non défini dans les variables d'environnement");
+            throw new IllegalStateException("JWT_SECRET non défini dans les variables d'environnement");
+        }
+        LOGGER.info("✅ JWT_SECRET chargé avec succès.");
+    }
 
     private Key getSigningKey() {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
+            LOGGER.severe("❌ SECRET_KEY non configurée dans les variables d'environnement");
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
+        LOGGER.info("✅ Chargement de la clé secrète pour JWT avec succès.");
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     public String generateToken(String username) {
+        LOGGER.info("🔑 Génération du token pour l'utilisateur : " + username);
         return createToken(new HashMap<>(), username);
     }
 
@@ -38,17 +52,25 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 heures
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public void validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
+        LOGGER.info("🔍 Vérification du token pour l'utilisateur : " + username);
+
+        // Vérification si le nom d'utilisateur dans le token correspond à celui des détails de l'utilisateur
         if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
-            throw new IllegalArgumentException("Token invalide ou expiré");
+            LOGGER.warning("⚠ Token invalide ou expiré pour : " + username);
+            return false; // Le token est invalide ou expiré
         }
+
+        LOGGER.info("✅ Token valide pour l'utilisateur : " + username);
+        return true; // Le token est valide
     }
+
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
