@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +30,14 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
 
-    // Liste des routes publiques à exclure du filtrage JWT
-    private static final List<String> PUBLIC_ROUTES = List.of("/", "/auth/register", "/auth/email", "/api/rentals");
+    private static final List<String> PUBLIC_ROUTES = List.of(
+            "/",
+            "/auth/register",
+            "/auth/email",
+            "/api/rentals",
+            "/swagger-ui/**",  // Swagger UI
+            "/v3/api-docs/**"  // API Docs de Swagger
+            );
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -58,20 +64,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        logger.info("Configuration de la sécurité...");
+        logger.info("Début de la configuration de la sécurité...");
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/").permitAll()
-                        .requestMatchers("/auth/register", "/auth/email", "/api/rentals").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    logger.info("Configuration des autorisations...");
+                    auth.requestMatchers(HttpMethod.GET, "/").permitAll();
+                    auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll();
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        logger.info("Sécurité configurée avec succès !");
+        logger.info("Fin de la configuration de la sécurité.");
+
         return http.build();
     }
 

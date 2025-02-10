@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -62,8 +61,11 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Ajout du log pour l'extraction du token
+        logger.info("Token JWT extrait : " + token);
+
         try {
-            logger.info("Vérification du token JWT..."+ requestURI);
+            logger.info("Vérification du token JWT pour la requête : " + requestURI);
             String username = jwtService.extractUsername(token);
             logger.info("Nom d'utilisateur extrait du token : " + username);
 
@@ -77,6 +79,9 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Ajout du log à la fin du filtrage
+        logger.info("Fin du filtrage JWT pour la requête : " + requestURI);
+
         filterChain.doFilter(request, response);
     }
 
@@ -89,6 +94,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+            // Ajout du log d'extraction du token
+            logger.info("En-tête Authorization trouvé, extraction du token.");
             return authHeader.substring(BEARER_PREFIX.length());
         }
         return null;
@@ -102,6 +109,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Validation du token
         if (jwtService.validateToken(token, userDetails)) {
+            logger.info("Token JWT validé pour l'utilisateur : " + username);
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
