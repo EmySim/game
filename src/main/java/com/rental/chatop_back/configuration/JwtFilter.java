@@ -23,7 +23,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/", "/auth/register", "/auth/email", "/api/rentals"
+            "/", "/auth/register", "api/auth/email", "/api/rentals", "/swagger-ui",
+            "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
     );
 
     @Autowired
