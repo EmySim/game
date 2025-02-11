@@ -3,6 +3,7 @@ package com.rental.chatop_back.configuration;
 import com.rental.chatop_back.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,13 +21,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
+
+    private static final List<String> PUBLIC_ROUTES = List.of(
+            "/auth/register",
+            "/auth/email",
+            "/api/rentals"
+    );
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -40,16 +49,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        logger.info("Début de la configuration de la sécurité...");
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    logger.info("Configuration des autorisations...");
+                    auth.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/auth/email").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
+        logger.info("Fin de la configuration de la sécurité.");
         return http.build();
     }
 
@@ -68,14 +83,18 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+
+        CorsConfiguration publicCorsConfig = new CorsConfiguration();
+        publicCorsConfig.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
+        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        publicCorsConfig.setAllowCredentials(true);
+
+        for (String route : PUBLIC_ROUTES) {
+            source.registerCorsConfiguration(route, publicCorsConfig);
+        }
+
         return source;
     }
 }
