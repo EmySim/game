@@ -22,16 +22,7 @@ public class JwtService {
     private static final Dotenv dotenv = Dotenv.load();
 
     // Clé secrète chargée depuis les variables d'environnement
-    private static final String SECRET_KEY;
-
-    static {
-        SECRET_KEY = dotenv.get("JWT_SECRET");
-        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
-            LOGGER.severe("❌ JWT_SECRET non défini dans les variables d'environnement");
-            throw new IllegalStateException("JWT_SECRET non défini dans les variables d'environnement");
-        }
-        LOGGER.info("✅ JWT_SECRET chargé avec succès.");
-    }
+    private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
 
     private Key getSigningKey() {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {

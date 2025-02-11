@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        logger.info("➡ Requête entrante : " + requestURI);
+        logger.info("Requete entrante : " + requestURI);
 
         // Vérification des endpoints publics
         if (isPublicEndpoint(requestURI)) {
