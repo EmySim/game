@@ -31,12 +31,9 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/",
             "/auth/register",
             "/auth/email",
-            "/api/rentals",
-            "/swagger-ui/**",  // Swagger UI
-            "/v3/api-docs/**"  // API Docs de Swagger
+            "/api/rentals"
     );
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
@@ -55,18 +52,18 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Appliquer CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    auth.requestMatchers(HttpMethod.GET, "/").permitAll();
-                    auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/auth/email").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         logger.info("Fin de la configuration de la sécurité.");
-
         return http.build();
     }
 
@@ -93,7 +90,6 @@ public class SecurityConfig {
         publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         publicCorsConfig.setAllowCredentials(true);
 
-        // Appliquer CORS uniquement aux routes publiques
         for (String route : PUBLIC_ROUTES) {
             source.registerCorsConfiguration(route, publicCorsConfig);
         }

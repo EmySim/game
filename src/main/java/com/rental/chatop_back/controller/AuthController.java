@@ -62,4 +62,10 @@ public class AuthController {
         logger.info("Fin de la méthode login");
         return ResponseEntity.ok(token);
     }
+
+    @GetMapping("/email")
+    public ResponseEntity<String> checkEmail() {
+        logger.info("Endpoint GET /auth/email appelé avec succès.");
+        return ResponseEntity.ok("Endpoint email accessible.");
+    }
 }
