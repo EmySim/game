@@ -34,7 +34,8 @@ public class SecurityConfig {
     private static final List<String> PUBLIC_ROUTES = List.of(
             "/auth/register",
             "/auth/email",
-            "/api/rentals"
+            "/api/rentals",
+            "/"
     );
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
@@ -60,6 +61,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/auth/email").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

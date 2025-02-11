@@ -25,30 +25,10 @@ public class ChatopBackApplication {
 		verifyEnvironmentVariable("DATABASE_PASSWORD", databasePassword);
 		verifyEnvironmentVariable("JWT_SECRET", jwtSecret);
 
-
-		// Afficher les variables chargées pour confirmation
-		System.out.println("### Variables d'environnement chargées ⊂(◉‿◉)つ ###");
-		System.out.println("DATABASE_URL = " + databaseUrl);
-		System.out.println("DATABASE_USERNAME = " + databaseUsername);
-		System.out.println("JWT_SECRET = " + jwtSecret);
-
-		// Vérification : arrêter l'application si une variable critique est manquante
-		/*
-		if (jwtSecret.equals("DefaultJWTSecret2025!")) {
-			System.err.println("Erreur critique : JWT_SECRET n'est pas correctement défini dans le fichier `.env` !");
-			System.exit(1); // Quitter l'application avec une erreur
-		}*/
-
 		// Configurer les propriétés système pour le framework Spring
 		System.setProperty("spring.datasource.url", databaseUrl);
 		System.setProperty("spring.datasource.username", databaseUsername);
 		System.setProperty("spring.datasource.password", databasePassword);
-
-		// Afficher les variables chargées pour débogage
-		System.out.println("### (ㆆ _ ㆆ) Variables d'environnement chargées  ###");
-		System.out.println("DATABASE_URL = " + databaseUrl);
-		System.out.println("DATABASE_USERNAME = " + databaseUsername);
-		System.out.println("JWT_SECRET = " + jwtSecret);
 
 		// Démarrer l'application Spring Boot
 		SpringApplication.run(ChatopBackApplication.class, args);
