@@ -153,15 +153,6 @@
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
-
-            <!-- invalide les tests, à retirer quand débogage terminé -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
