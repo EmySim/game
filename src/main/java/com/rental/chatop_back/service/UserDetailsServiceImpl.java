@@ -14,7 +14,9 @@ import java.util.logging.Logger;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+
     private static final Logger LOGGER = Logger.getLogger(UserDetailsServiceImpl.class.getName());
+
 
     private final UserRepository userRepository;
 

@@ -22,7 +22,9 @@ public class JwtService {
     private static final Dotenv dotenv = Dotenv.load();
 
     // Clé secrète chargée depuis les variables d'environnement
+
     private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
+
 
     private Key getSigningKey() {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
