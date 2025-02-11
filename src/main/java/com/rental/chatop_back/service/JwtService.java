@@ -64,6 +64,18 @@ public class JwtService {
         return true; // Le token est valide
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warning("⚠ Token invalide : " + e.getMessage());
+            return false;
+        }
+    }
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
