@@ -53,7 +53,14 @@ public class JwtFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
         }
 
-        if (token == null || !jwtService.validateToken(token)) {
+        if (token == null) {
+            logger.warning("Token manquant dans l'en-tête de la requête.");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        if (!jwtService.validateToken(token)) {
+            logger.warning("Token JWT invalide.");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
