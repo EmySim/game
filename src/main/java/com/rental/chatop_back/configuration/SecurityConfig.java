@@ -32,7 +32,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/", "/auth/register", "api/auth/email", "/api/rentals", "/swagger-ui",
+            "/", "/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
             "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
     );
 
@@ -56,8 +56,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    auth.requestMatchers(HttpMethod.POST, "api/auth/register").permitAll();
-                    auth.requestMatchers(HttpMethod.POST, "api/auth/email").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/auth/email").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/").permitAll();
                     auth.anyRequest().authenticated();
@@ -87,7 +87,7 @@ public class SecurityConfig {
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
         publicCorsConfig.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
-        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS"));
         publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         publicCorsConfig.setAllowCredentials(true);
 
