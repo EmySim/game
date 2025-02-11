@@ -56,8 +56,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    auth.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
-                    auth.requestMatchers(HttpMethod.POST, "/auth/email").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "api/auth/register").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "api/auth/email").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/").permitAll();
                     auth.anyRequest().authenticated();
