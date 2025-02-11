@@ -92,6 +92,7 @@ public class SecurityConfig {
         publicCorsConfig.setAllowCredentials(true);
 
         for (String route : PUBLIC_ROUTES) {
+            logger.info("Configuration du CORS pour la route publique : " + route);
             source.registerCorsConfiguration(route, publicCorsConfig);
         }
 

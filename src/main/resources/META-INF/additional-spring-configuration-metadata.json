@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "error.include-binding-errors",
+      "type": "java.lang.String",
+      "description": "Description for error.include-binding-errors."
+  }
+] }
