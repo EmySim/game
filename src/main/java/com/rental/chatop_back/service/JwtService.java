@@ -28,15 +28,15 @@ public class JwtService {
 
     private Key getSigningKey() {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
-            LOGGER.severe("❌ SECRET_KEY non configurée dans les variables d'environnement");
+            LOGGER.severe("SECRET_KEY non configurée dans les variables d'environnement");
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
-        LOGGER.info("✅ Chargement de la clé secrète pour JWT avec succès.");
+        LOGGER.info("Chargement de la clé secrète pour JWT avec succès.");
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
     public String generateToken(String username) {
-        LOGGER.info("🔑 Génération du token pour l'utilisateur : " + username);
+        LOGGER.info("Génération du token pour l'utilisateur : " + username);
         return createToken(new HashMap<>(), username);
     }
 
@@ -52,18 +52,30 @@ public class JwtService {
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        LOGGER.info("🔍 Vérification du token pour l'utilisateur : " + username);
+        LOGGER.info("Vérification du token pour l'utilisateur : " + username);
 
         // Vérification si le nom d'utilisateur dans le token correspond à celui des détails de l'utilisateur
         if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
-            LOGGER.warning("⚠ Token invalide ou expiré pour : " + username);
+            LOGGER.warning("Token invalide ou expiré pour : " + username);
             return false; // Le token est invalide ou expiré
         }
 
-        LOGGER.info("✅ Token valide pour l'utilisateur : " + username);
+        LOGGER.info("Token valide pour l'utilisateur : " + username);
         return true; // Le token est valide
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warning("Token invalide : " + e.getMessage());
+            return false;
+        }
+    }
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()

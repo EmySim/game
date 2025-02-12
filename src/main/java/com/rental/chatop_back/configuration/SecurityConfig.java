@@ -3,13 +3,11 @@ package com.rental.chatop_back.configuration;
 import com.rental.chatop_back.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +17,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -31,11 +28,20 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
 
+    // Centralisation des routes publiques
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/auth/register",
-            "/auth/email",
-            "/api/rentals"
+            "/api/auth/register",
+            "/api/auth/email",
+            "/api/rentals",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-resources/configuration/ui"
     );
+
+    public static List<String> getPublicRoutes() {
+        return PUBLIC_ROUTES;
+    }
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -52,14 +58,12 @@ public class SecurityConfig {
         logger.info("Début de la configuration de la sécurité...");
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    auth.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
-                    auth.requestMatchers(HttpMethod.POST, "/auth/email").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
+                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -78,23 +82,21 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager() {
-        return new ProviderManager(Collections.singletonList(authenticationProvider()));
+        return new ProviderManager(List.of(authenticationProvider()));
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        logger.info("Setting CORS configuration...");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
-        publicCorsConfig.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
-        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
-        publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        publicCorsConfig.setAllowedOrigins(List.of("*")); // Autorise toutes les origines (à restreindre en production)
+        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"));
+        publicCorsConfig.setAllowedHeaders(List.of("Content-Type", "Origin", "Accept", "Authorization", "Content-Length", "X-Requested-With"));
         publicCorsConfig.setAllowCredentials(true);
 
-        for (String route : PUBLIC_ROUTES) {
-            source.registerCorsConfiguration(route, publicCorsConfig);
-        }
-
+        source.registerCorsConfiguration("/**", publicCorsConfig);
         return source;
     }
 }

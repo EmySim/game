@@ -63,9 +63,9 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
-    @GetMapping("/email")
-    public ResponseEntity<String> checkEmail() {
-        logger.info("Endpoint GET /auth/email appelé avec succès.");
-        return ResponseEntity.ok("Endpoint email accessible.");
+    @GetMapping("/register")
+    public ResponseEntity<String> getRegister() {
+        return ResponseEntity.ok("GET request to /api/auth/register is allowed.");
     }
+
 }
