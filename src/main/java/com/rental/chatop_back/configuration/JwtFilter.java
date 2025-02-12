@@ -59,8 +59,12 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.info("Token reçu : " + token);
 
         try {
+            logger.info("Extraction du nom d'utilisateur à partir du token...");
             String username = jwtService.extractUsername(token);
+            logger.info("Nom d'utilisateur extrait du token : " + username);
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            logger.info("Utilisateur chargé avec succès : " + username);
 
             // Validation du token
             if (!jwtService.validateToken(token, userDetails)) {
@@ -76,6 +80,7 @@ public class JwtFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            logger.info("Utilisateur authentifié avec succès : " + username);
 
         } catch (Exception e) {
             logger.severe("Erreur lors de la validation du token JWT : " + e.getMessage());

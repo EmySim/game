@@ -12,7 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,6 +29,7 @@ public class SecurityConfig {
 
     // Centralisation des routes publiques
     private static final List<String> PUBLIC_ROUTES = List.of(
+            "/", // Débloquer la route racine
             "/api/auth/register",
             "/api/auth/email",
             "/api/rentals",
@@ -63,10 +63,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
+                    // Définir les routes publiques
+                    for (String route : PUBLIC_ROUTES) {
+                        logger.info("Autorisation de la route publique : " + route);
+                        auth.requestMatchers(route).permitAll();
+                    }
+                    // Ajouter la configuration de sécurité pour les autres routes
                     auth.anyRequest().authenticated();
-                })
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                }); // La parenthèse manquante
+                //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         logger.info("Fin de la configuration de la sécurité.");
         return http.build();
