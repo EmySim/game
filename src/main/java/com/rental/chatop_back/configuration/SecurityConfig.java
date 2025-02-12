@@ -3,7 +3,6 @@ package com.rental.chatop_back.configuration;
 import com.rental.chatop_back.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,6 +28,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
 
+    // Centralisation des routes publiques
     private static final List<String> PUBLIC_ROUTES = List.of(
             "/api/auth/register",
             "/api/auth/email",
@@ -38,6 +38,10 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/swagger-resources/configuration/ui"
     );
+
+    public static List<String> getPublicRoutes() {
+        return PUBLIC_ROUTES;
+    }
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -59,11 +63,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    auth.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
-                    auth.requestMatchers(HttpMethod.POST, "/api/auth/email").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/").permitAll();
-                    auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll();
+                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -91,9 +91,9 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration publicCorsConfig = new CorsConfiguration();
-        publicCorsConfig.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
-        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS"));
-        publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        publicCorsConfig.setAllowedOrigins(List.of("*")); // Autorise toutes les origines (à restreindre en production)
+        publicCorsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"));
+        publicCorsConfig.setAllowedHeaders(List.of("Content-Type", "Origin", "Accept", "Authorization", "Content-Length", "X-Requested-With"));
         publicCorsConfig.setAllowCredentials(true);
 
         source.registerCorsConfiguration("/**", publicCorsConfig);

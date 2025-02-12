@@ -22,10 +22,7 @@ import java.util.logging.Logger;
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/", "/api/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
-            "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
-    );
+    private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.getPublicRoutes();
 
     @Autowired
     private JwtService jwtService;
@@ -42,44 +39,50 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         logger.info("Requête entrante : " + requestURI);
 
+        // Ignorer le filtrage JWT pour les endpoints publics
         if (PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::startsWith)) {
             logger.info("Endpoint public : " + requestURI + " (Filtrage JWT ignoré)");
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Extraction du token dans l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
-        String token = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-        }
-
-        if (token == null) {
-            logger.warning("Token manquant dans l'en-tête de la requête.");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("Error: Token is missing");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warning("Token JWT manquant ou mal formaté dans l'en-tête.");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Error: Missing or malformed token");
             return;
         }
+
+        String token = authHeader.substring(7); // Supprime "Bearer "
         logger.info("Token reçu : " + token);
-        String username = jwtService.extractUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        if (!jwtService.validateToken(token, userDetails)) {
-            logger.warning("Token JWT invalide : " + token);
-            logger.warning("Nom d'utilisateur associé au token invalide : " + username);
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("Error: Invalid token");
-            logger.warning("403 Forbidden: Token JWT invalide.");
+        try {
+            String username = jwtService.extractUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            // Validation du token
+            if (!jwtService.validateToken(token, userDetails)) {
+                logger.warning("Token JWT invalide.");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Error: Invalid token");
+                return;
+            }
+
+            logger.info("Token JWT valide pour l'utilisateur : " + username);
+
+            // Authentification Spring Security
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception e) {
+            logger.severe("Erreur lors de la validation du token JWT : " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Error: Token validation failed");
             return;
         }
-
-        logger.info("Nom d'utilisateur associé au token valide : " + username);
-
-        logger.info("Token JWT valide pour l'utilisateur : " + username);
-
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }
