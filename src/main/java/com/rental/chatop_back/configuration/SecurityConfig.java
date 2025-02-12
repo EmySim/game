@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Configuration
-@EnableWebSecurity
+
 public class SecurityConfig {
 
     private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
@@ -58,12 +57,11 @@ public class SecurityConfig {
         logger.info("Début de la configuration de la sécurité...");
 
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable()) // Disable CSRF protection
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS configuration
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Disable sessions (stateless)
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll() // Permet uniquement l'accès aux routes publiques
-                                .anyRequest().authenticated() // Pour toutes les autres routes, authentification requise
+                        auth.anyRequest().permitAll() // Allow all requests to pass without authentication
                 );
 
         logger.info("Fin de la configuration de la sécurité.");
