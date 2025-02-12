@@ -9,7 +9,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -32,8 +30,13 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/", "/api/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
-            "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
+            "/api/auth/register",
+            "/api/auth/email",
+            "/api/rentals",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-resources/configuration/ui"
     );
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
@@ -51,7 +54,7 @@ public class SecurityConfig {
         logger.info("Début de la configuration de la sécurité...");
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
@@ -60,6 +63,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/email").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/rentals").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/").permitAll();
+                    auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -78,7 +82,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager() {
-        return new ProviderManager(Collections.singletonList(authenticationProvider()));
+        return new ProviderManager(List.of(authenticationProvider()));
     }
 
     @Bean
@@ -91,11 +95,7 @@ public class SecurityConfig {
         publicCorsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         publicCorsConfig.setAllowCredentials(true);
 
-        for (String route : PUBLIC_ROUTES) {
-            logger.info("Configuration du CORS pour la route publique : " + route);
-            source.registerCorsConfiguration(route, publicCorsConfig);
-        }
-
+        source.registerCorsConfiguration("/**", publicCorsConfig);
         return source;
     }
 }

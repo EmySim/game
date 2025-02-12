@@ -63,4 +63,9 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
+    @GetMapping("/register")
+    public ResponseEntity<String> getRegister() {
+        return ResponseEntity.ok("GET request to /api/auth/register is allowed.");
+    }
+
 }
