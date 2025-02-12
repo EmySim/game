@@ -61,21 +61,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> {
-                    logger.info("Configuration des autorisations...");
-                    // Définir les routes publiques
-                    for (String route : PUBLIC_ROUTES) {
-                        logger.info("Autorisation de la route publique : " + route);
-                        auth.requestMatchers(route).permitAll();
-                    }
-                    // Ajouter la configuration de sécurité pour les autres routes
-                    auth.anyRequest().authenticated();
-                }); // La parenthèse manquante
-                //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll() // Permet uniquement l'accès aux routes publiques
+                                .anyRequest().authenticated() // Pour toutes les autres routes, authentification requise
+                );
 
         logger.info("Fin de la configuration de la sécurité.");
         return http.build();
     }
+
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
