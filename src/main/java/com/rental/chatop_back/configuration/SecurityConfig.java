@@ -32,7 +32,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/", "/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
+            "/", "/api/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
             "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
     );
 

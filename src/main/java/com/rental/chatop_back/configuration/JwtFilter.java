@@ -23,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/", "/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
+            "/", "/api/auth/register", "/api/auth/email", "/api/rentals", "/swagger-ui",
             "/v3/api-docs", "/swagger-resources", "/swagger-resources/configuration/ui"
     );
 
@@ -57,17 +57,21 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token == null) {
             logger.warning("Token manquant dans l'en-tête de la requête.");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
-        if (!jwtService.validateToken(token)) {
-            logger.warning("Token JWT invalide.");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Error: Token is missing");
             return;
         }
 
         String username = jwtService.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (!jwtService.validateToken(token, userDetails)) {
+            logger.warning("Token JWT invalide.");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Error: Invalid token");
+            logger.warning("403 Forbidden: Token JWT invalide.");
+            return;
+        }
+
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
