@@ -63,10 +63,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
+                    // Autoriser l'accès sans authentification pour les routes publiques
                     PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
                     auth.anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Appliquer le filtre JWT après la configuration des routes publiques
 
         logger.info("Fin de la configuration de la sécurité.");
         return http.build();

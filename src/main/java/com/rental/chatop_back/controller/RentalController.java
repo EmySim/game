@@ -11,6 +11,8 @@ public class RentalController {
 
     @GetMapping
     public ResponseEntity<String> getRentals() {
-        return ResponseEntity.ok("Liste des locations");
+        return ResponseEntity.ok("{\n" +
+                "  \"message\": \"Rental created !\"\n" +
+                "}");
     }
 }
