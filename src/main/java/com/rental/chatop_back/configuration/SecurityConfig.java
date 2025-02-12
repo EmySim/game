@@ -7,10 +7,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Configuration
-
+@EnableWebSecurity
 public class SecurityConfig {
 
     private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
@@ -28,7 +30,6 @@ public class SecurityConfig {
 
     // Centralisation des routes publiques
     private static final List<String> PUBLIC_ROUTES = List.of(
-            "/", // Débloquer la route racine
             "/api/auth/register",
             "/api/auth/email",
             "/api/rentals",
@@ -57,17 +58,19 @@ public class SecurityConfig {
         logger.info("Début de la configuration de la sécurité...");
 
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF protection
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS configuration
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Disable sessions (stateless)
-                .authorizeHttpRequests(auth ->
-                        auth.anyRequest().permitAll() // Allow all requests to pass without authentication
-                );
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> {
+                    logger.info("Configuration des autorisations...");
+                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
+                    auth.anyRequest().authenticated();
+                })
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         logger.info("Fin de la configuration de la sécurité.");
         return http.build();
     }
-
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
