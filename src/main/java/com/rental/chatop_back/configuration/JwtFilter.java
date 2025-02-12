@@ -60,17 +60,22 @@ public class JwtFilter extends OncePerRequestFilter {
             response.getWriter().write("Error: Token is missing");
             return;
         }
-
+        logger.info("Token reçu : " + token);
         String username = jwtService.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (!jwtService.validateToken(token, userDetails)) {
-            logger.warning("Token JWT invalide.");
+            logger.warning("Token JWT invalide : " + token);
+            logger.warning("Nom d'utilisateur associé au token invalide : " + username);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("Error: Invalid token");
             logger.warning("403 Forbidden: Token JWT invalide.");
             return;
         }
+
+        logger.info("Nom d'utilisateur associé au token valide : " + username);
+
+        logger.info("Token JWT valide pour l'utilisateur : " + username);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
