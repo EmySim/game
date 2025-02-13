@@ -33,10 +33,13 @@ public class SecurityConfig {
             "/api/auth/register",
             "/api/auth/email",
             "/api/rentals",
+            "/api/auth/me",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**",
-            "/swagger-resources/configuration/ui"
+            "/swagger-resources/configuration/ui",
+            "/favicon.ico",
+            "/"
     );
 
     public static List<String> getPublicRoutes() {
@@ -64,7 +67,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
                     // Autoriser l'accès sans authentification pour les routes publiques
-                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(route).permitAll());
+                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll());
+                    logger.info("Routes publiques déclarées : " + PUBLIC_ROUTES);
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Appliquer le filtre JWT après la configuration des routes publiques
