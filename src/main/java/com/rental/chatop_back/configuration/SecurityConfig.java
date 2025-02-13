@@ -1,6 +1,6 @@
 package com.rental.chatop_back.configuration;
 
-import com.rental.chatop_back.service.UserDetailsServiceImpl;
+import com.rental.chatop_back.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public class SecurityConfig {
 
     private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
     private final JwtFilter jwtFilter;
 
     // Centralisation des routes publiques
@@ -39,8 +39,8 @@ public class SecurityConfig {
             "/favicon.ico"
     );
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(UserService userService, JwtFilter jwtFilter) {
+        this.userService = userService;
         this.jwtFilter = jwtFilter;
     }
 
@@ -85,7 +85,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
