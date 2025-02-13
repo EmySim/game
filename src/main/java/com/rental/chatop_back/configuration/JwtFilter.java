@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.getPublicRoutes(); // Routes publiques
+    private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.PUBLIC_ROUTES; // Routes publiques
 
     @Autowired
     private JwtService jwtService;

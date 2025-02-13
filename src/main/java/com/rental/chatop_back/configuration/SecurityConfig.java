@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     // Centralisation des routes publiques
-    private static final List<String> PUBLIC_ROUTES = List.of(
+    public static final List<String> PUBLIC_ROUTES = List.of(
             "/api/auth/register",
             "/api/auth/email",
             "/api/rentals",
