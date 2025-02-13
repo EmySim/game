@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.Base64;
 
 @Service
 public class JwtService {
@@ -22,9 +23,7 @@ public class JwtService {
     private static final Dotenv dotenv = Dotenv.load();
 
     // Clé secrète chargée depuis les variables d'environnement
-
     private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
-
 
     private Key getSigningKey() {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
@@ -32,13 +31,12 @@ public class JwtService {
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
         LOGGER.info("Chargement de la clé secrète pour JWT avec succès.");
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY)); // Correction ici
     }
 
-    public String generateToken(String username) {
-        LOGGER.info("Génération du token pour l'utilisateur : " + username);
-        String username = user.getUsername();
-        return createToken(new HashMap<>(), username);
+    public String generateToken(UserDetails userDetails) {
+        LOGGER.info("Génération du token pour l'utilisateur : " + userDetails.getUsername());
+        return createToken(new HashMap<>(), userDetails.getUsername());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -55,14 +53,13 @@ public class JwtService {
         final String username = extractUsername(token);
         LOGGER.info("Vérification du token pour l'utilisateur : " + username);
 
-        // Vérification si le nom d'utilisateur dans le token correspond à celui des détails de l'utilisateur
         if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
             LOGGER.warning("Token invalide ou expiré pour : " + username);
-            return false; // Le token est invalide ou expiré
+            return false;
         }
 
         LOGGER.info("Token valide pour l'utilisateur : " + username);
-        return true; // Le token est valide
+        return true;
     }
 
     public boolean validateToken(String token) {
