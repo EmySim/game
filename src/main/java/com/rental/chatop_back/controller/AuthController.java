@@ -31,16 +31,21 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody User user) {
         logger.info("Début de la méthode register pour l'email : " + user.getEmail());
 
-        if (userService.findByEmail(user.getEmail()).isPresent()) {
-            logger.warning("Échec de l'inscription : email déjà utilisé - " + user.getEmail());
-            return ResponseEntity.badRequest().body("Email déjà utilisé !");
+        try {
+            if (userService.findByEmail(user.getEmail()).isPresent()) {
+                logger.warning("Échec de l'inscription : email déjà utilisé - " + user.getEmail());
+                return ResponseEntity.badRequest().body("Email déjà utilisé !");
+            }
+
+            userService.register(user);
+            logger.info("Utilisateur créé avec succès : " + user.getEmail());
+
+            logger.info("Fin de la méthode register");
+            return ResponseEntity.ok("Utilisateur créé !");
+        } catch (Exception e) {
+            logger.severe("Erreur lors de l'inscription de l'utilisateur : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de l'inscription de l'utilisateur");
         }
-
-        userService.register(user);
-        logger.info("Utilisateur créé avec succès : " + user.getEmail());
-
-        logger.info("Fin de la méthode register");
-        return ResponseEntity.ok("Utilisateur créé !");
     }
 
     @PostMapping("/email")

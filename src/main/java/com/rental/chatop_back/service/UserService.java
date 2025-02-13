@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class UserService {
 
+    private static final Logger logger = Logger.getLogger(UserService.class.getName());
     private static final String EMAIL_ALREADY_USED_ERROR = "Cet email est déjà utilisé.";
 
     private final UserRepository userRepository;
@@ -23,9 +25,18 @@ public class UserService {
     }
 
     public void register(User user) {
-        validateEmailUniqueness(user.getEmail());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        try {
+            validateEmailUniqueness(user.getEmail());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(user);
+            logger.info("Utilisateur enregistré avec succès : " + user.getEmail());
+        } catch (IllegalArgumentException e) {
+            logger.warning("Erreur lors de l'enregistrement de l'utilisateur : " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.severe("Erreur inattendue lors de l'enregistrement de l'utilisateur : " + e.getMessage());
+            throw new RuntimeException("Erreur inattendue lors de l'enregistrement de l'utilisateur", e);
+        }
     }
 
     private void validateEmailUniqueness(String email) {
@@ -38,5 +49,3 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 }
-
-

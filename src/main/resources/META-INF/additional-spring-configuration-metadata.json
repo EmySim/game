@@ -4,5 +4,15 @@
       "name": "error.include-binding-errors",
       "type": "java.lang.String",
       "description": "Description for error.include-binding-errors."
-  }
-] }
+    },
+    {
+      "name": "error.include-message",
+      "type": "java.lang.String",
+      "description": "Description for error.include-binding-errors."
+    },
+    {
+      "name": "error.path",
+      "type": "java.lang.String",
+      "description": "Description for error.include-binding-errors."
+    }
+  ] }
