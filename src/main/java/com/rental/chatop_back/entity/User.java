@@ -1,4 +1,4 @@
-package com.rental.chatop_back.model;
+package com.rental.chatop_back.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -28,6 +28,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
@@ -37,10 +41,11 @@ public class User {
     public User() {
     }
 
-    public User(String email, String name, String password) {
+    public User(String email, String name, String password, Role role) {
         this.email = email;
         this.name = name;
         this.password = password;
+        this.role = role;
     }
 
     @PrePersist
@@ -85,6 +90,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public LocalDateTime getCreatedAt() {

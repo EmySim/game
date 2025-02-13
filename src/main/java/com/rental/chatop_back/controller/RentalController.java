@@ -1,6 +1,6 @@
 package com.rental.chatop_back.controller;
 
-import com.rental.chatop_back.model.Rental;
+import com.rental.chatop_back.entity.Rental;
 import com.rental.chatop_back.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

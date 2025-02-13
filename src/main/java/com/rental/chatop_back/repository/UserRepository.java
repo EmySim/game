@@ -1,6 +1,6 @@
 package com.rental.chatop_back.repository;
 
-import com.rental.chatop_back.model.User;
+import com.rental.chatop_back.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

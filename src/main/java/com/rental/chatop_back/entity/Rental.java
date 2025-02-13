@@ -1,4 +1,4 @@
-package com.rental.chatop_back.model;
+package com.rental.chatop_back.entity;
 
 import jakarta.persistence.*;
 import java.util.Date;

@@ -1,6 +1,6 @@
 package com.rental.chatop_back.repository;
 
-import com.rental.chatop_back.model.Rental;
+import com.rental.chatop_back.entity.Rental;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RentalRepository extends JpaRepository<Rental, Long> {

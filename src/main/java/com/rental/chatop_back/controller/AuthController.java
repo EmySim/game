@@ -1,7 +1,7 @@
 package com.rental.chatop_back.controller;
 
 import com.rental.chatop_back.dto.AuthRequest;
-import com.rental.chatop_back.model.User;
+import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.service.JwtService;
 import com.rental.chatop_back.service.UserService;
 import org.springframework.http.HttpStatus;

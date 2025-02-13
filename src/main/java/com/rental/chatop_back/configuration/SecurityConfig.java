@@ -31,9 +31,7 @@ public class SecurityConfig {
 
     // Centralisation des routes publiques
     public static final List<String> PUBLIC_ROUTES = List.of(
-            "/api/auth/register",
-            "/api/auth/email",
-            "/api/rentals",
+            "/404",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**",
