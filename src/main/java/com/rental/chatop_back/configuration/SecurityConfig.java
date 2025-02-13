@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,13 +38,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-resources/**",
             "/swagger-resources/configuration/ui",
-            "/favicon.ico",
-            "/"
+            "/favicon.ico"
     );
-
-    public static List<String> getPublicRoutes() {
-        return PUBLIC_ROUTES;
-    }
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -65,12 +61,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     logger.info("Configuration des autorisations...");
-                    // Autoriser l'accès sans authentification pour les routes publiques
-                    PUBLIC_ROUTES.forEach(route -> auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll());
+
+                    // Autoriser les routes publiques
+                    auth.requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll();
                     logger.info("Routes publiques déclarées : " + PUBLIC_ROUTES);
-                    auth.anyRequest().authenticated();
+
+                    // Redirection de `/` vers `/api/auth/me`
+                    auth.requestMatchers("/").permitAll().anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Appliquer le filtre JWT après la configuration des routes publiques
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.defaultAuthenticationEntryPointFor(
+                                (request, response, authException) -> {
+                                    logger.info("Redirection de '/' vers '/api/auth/me'");
+                                    response.sendRedirect("/api/auth/me");
+                                },
+                                new AntPathRequestMatcher("/")
+                        )
+                );
 
         logger.info("Fin de la configuration de la sécurité.");
         return http.build();
