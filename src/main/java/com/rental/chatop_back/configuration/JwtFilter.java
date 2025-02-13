@@ -48,13 +48,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Extraction du token dans l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.warning("Token JWT manquant ou mal formaté dans l'en-tête.");
+        logger.info("Valeur reçue pour Authorization: " + authHeader);
+        if (authHeader == null) {
+            logger.warning("Aucun en-tête Authorization reçu.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Erreur : Token manquant ou mal formaté");
+            response.getWriter().write("Erreur : Aucun token reçu.");
+            return;
+        }
+        if (!authHeader.startsWith("Bearer ")) {
+            logger.warning("Format incorrect de l'en-tête Authorization.");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Erreur : Format de token invalide.");
             return;
         }
 
+        // Extraire le token
         String token = authHeader.substring(7); // Supprime "Bearer "
         logger.info("Token reçu : " + token);
 
@@ -68,13 +76,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // Validation du token
             if (!jwtService.validateToken(token, userDetails)) {
-                logger.warning("Token JWT invalide.");
+                logger.warning("Token invalide.");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Erreur : Token invalide");
                 return;
             }
 
-            logger.info("Token JWT validé pour l'utilisateur : " + username);
+            logger.info("Token validé pour l'utilisateur : " + username);
 
             // Authentification avec Spring Security
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
