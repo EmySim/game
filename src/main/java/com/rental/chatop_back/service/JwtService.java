@@ -37,6 +37,7 @@ public class JwtService {
 
     public String generateToken(String username) {
         LOGGER.info("Génération du token pour l'utilisateur : " + username);
+        String username = user.getUsername();
         return createToken(new HashMap<>(), username);
     }
 

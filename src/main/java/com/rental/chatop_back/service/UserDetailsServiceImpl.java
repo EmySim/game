@@ -37,12 +37,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
-            LOGGER.warning("❌ Utilisateur non trouvé avec l'email : " + email);
+            LOGGER.warning("Utilisateur non trouvé avec l'email : " + email);
             throw new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email);
         }
 
         User user = optionalUser.get();
-        LOGGER.info("✅ Utilisateur trouvé : " + user.getEmail());
+        LOGGER.info("Utilisateur trouvé : " + user.getEmail());
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
