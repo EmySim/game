@@ -116,6 +116,16 @@ public class User implements UserDetails {
     }
 
     @Override
+    public String getUsername() {
+        return this.email; // Spring Security utilise généralement l'email comme username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
     public boolean isAccountNonLocked() {
         return true;
     }
