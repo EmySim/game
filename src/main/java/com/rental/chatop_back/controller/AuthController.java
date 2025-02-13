@@ -61,12 +61,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
         }
 
-        String token = jwtService.generateToken(request.getEmail());
-        logger.info("Token généré avec succès pour l'email : " + request.getEmail());
+        // ERREUR : jwtService.generateToken(request.getEmail());
+        // Récupérer l'utilisateur depuis la base de données
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
+        // Passer l'objet `UserDetails` à generateToken()
+        String token = jwtService.generateToken(user);
+
+        logger.info("Token généré avec succès pour l'email : " + request.getEmail());
         logger.info("Fin de la méthode login");
+
         return ResponseEntity.ok(token);
     }
+
 
     @GetMapping("/register")
     public ResponseEntity<String> getRegister() {

@@ -31,7 +31,7 @@ public class ChatopBackApplication {
 		System.setProperty("spring.datasource.password", databasePassword);
 
 		// Log statement to indicate successful loading of environment variables
-		System.out.println("Environment variables loaded successfully.");
+		System.out.println("Environment variables loaded successfully1.");
 
 		// Démarrer l'application Spring Boot
 		SpringApplication.run(ChatopBackApplication.class, args);

@@ -4,11 +4,8 @@ import com.rental.chatop_back.dto.AuthRequest;
 import com.rental.chatop_back.dto.AuthResponse;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
-import com.rental.chatop_back.security.JwtService;
-import com.rental.chatop_back.service.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
