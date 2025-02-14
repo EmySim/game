@@ -16,6 +16,7 @@ import java.util.Collections;
 @Table(name = "users")
 public class User implements UserDetails {
 
+    private final Role role;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,13 +41,15 @@ public class User implements UserDetails {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
-    public User() {
+    public User(Object o, String admin, String adminpass, Role role) {
+        this.role = null;
     }
 
     public User(String email, String name, String password) {
         this.email = email;
         this.name = name;
         this.password = password;
+        this.role = Role.USER;
     }
 
     @PrePersist

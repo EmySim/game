@@ -2,6 +2,7 @@ package com.rental.chatop_back.service;
 
 import com.rental.chatop_back.dto.AuthRequest;
 import com.rental.chatop_back.dto.AuthResponse;
+import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,4 +55,12 @@ public class AuthService {
         String token = jwtService.generateToken(user); // Utilisation de User directement
         return new AuthResponse(token);
     }
+
+    public UserDTO getUserDetails(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        return new UserDTO(user.getId(), user.getName(), user.getEmail());
+    }
+
 }
