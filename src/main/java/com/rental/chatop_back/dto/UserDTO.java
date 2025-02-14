@@ -1,5 +1,8 @@
 package com.rental.chatop_back.dto;
 
+/**
+ * Data Transfer Object (DTO) for user information.
+ */
 public class UserDTO {
     private String email;
     private String name;

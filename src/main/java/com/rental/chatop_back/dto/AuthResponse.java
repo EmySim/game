@@ -1,5 +1,8 @@
 package com.rental.chatop_back.dto;
 
+/**
+ * Data Transfer Object (DTO) for authentication responses.
+ */
 public class AuthResponse {
     private String token;
 

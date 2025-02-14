@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.Key;
 import java.util.Date;
@@ -14,26 +15,42 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.Base64;
 
+/**
+ * Service for handling JWT-related operations.
+ */
 @Service
 public class JwtService {
 
     private static final Logger LOGGER = Logger.getLogger(JwtService.class.getName());
 
-    // Charger les variables d'environnement avec Dotenv
-    private static final Dotenv dotenv = Dotenv.load();
+    private final Dotenv dotenv;
+
+    @Autowired
+    public JwtService(Dotenv dotenv) {
+        this.dotenv = dotenv;
+    }
 
     // Clé secrète chargée depuis les variables d'environnement
-    private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
-
-    private Key getSigningKey() {
-        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
+    private String getSecretKey() {
+        String secretKey = dotenv.get("JWT_SECRET");
+        if (secretKey == null || secretKey.isEmpty()) {
             LOGGER.severe("SECRET_KEY non configurée dans les variables d'environnement");
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
         LOGGER.info("Chargement de la clé secrète pour JWT avec succès.");
-        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY)); // Correction ici
+        return secretKey;
     }
 
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(getSecretKey()));
+    }
+
+    /**
+     * Generates a JWT token for the given user details.
+     *
+     * @param userDetails The user details.
+     * @return The generated JWT token.
+     */
     public String generateToken(UserDetails userDetails) {
         LOGGER.info("Génération du token pour l'utilisateur : " + userDetails.getUsername());
         return createToken(new HashMap<>(), userDetails.getUsername());
@@ -49,6 +66,13 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Validates the given JWT token for the given user details.
+     *
+     * @param token The JWT token.
+     * @param userDetails The user details.
+     * @return True if the token is valid, false otherwise.
+     */
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         LOGGER.info("Vérification du token pour l'utilisateur : " + username);
@@ -62,6 +86,12 @@ public class JwtService {
         return true;
     }
 
+    /**
+     * Validates the given JWT token.
+     *
+     * @param token The JWT token.
+     * @return True if the token is valid, false otherwise.
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -75,6 +105,12 @@ public class JwtService {
         }
     }
 
+    /**
+     * Extracts the username from the given JWT token.
+     *
+     * @param token The JWT token.
+     * @return The username.
+     */
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
