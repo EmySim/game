@@ -1,6 +1,6 @@
 package com.rental.chatop_back.configuration;
 
-import com.rental.chatop_back.service.UserDetailsServiceImpl;
+import com.rental.chatop_back.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,19 +21,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Configuration class for Spring Security.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
     private final JwtFilter jwtFilter;
 
     // Centralisation des routes publiques
     public static final List<String> PUBLIC_ROUTES = List.of(
-            "/api/auth/register",
-            "/api/auth/email",
-            "/api/rentals",
+            "/404",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**",
@@ -41,8 +42,8 @@ public class SecurityConfig {
             "/favicon.ico"
     );
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(UserService userService, JwtFilter jwtFilter) {
+        this.userService = userService;
         this.jwtFilter = jwtFilter;
     }
 
@@ -87,7 +88,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

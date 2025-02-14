@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Filter for handling JWT authentication.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
