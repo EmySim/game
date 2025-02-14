@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Entity class representing a user in the system.
+ */
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

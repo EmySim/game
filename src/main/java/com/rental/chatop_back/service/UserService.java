@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.Collections;
 
+/**
+ * Service for handling user-related operations.
+ */
 @Service
 public class UserService implements UserDetailsService {
 
@@ -28,6 +31,11 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new user.
+     *
+     * @param user The user to be registered.
+     */
     public void register(User user) {
         try {
             validateEmailUniqueness(user.getEmail());
@@ -43,16 +51,34 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    /**
+     * Validates the uniqueness of the email.
+     *
+     * @param email The email to be validated.
+     */
     private void validateEmailUniqueness(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException(EMAIL_ALREADY_USED_ERROR);
         }
     }
 
+    /**
+     * Finds a user by email.
+     *
+     * @param email The email of the user.
+     * @return Optional containing the user if found, empty otherwise.
+     */
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    /**
+     * Loads a user by username (email).
+     *
+     * @param email The email of the user.
+     * @return UserDetails containing the user details.
+     * @throws UsernameNotFoundException if the user is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);

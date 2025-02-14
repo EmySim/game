@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Initialise les utilisateurs par défaut si la base est vide.
+ * DataInitializer is a component that initializes default users if the database is empty.
  */
 @Component
 public class DataInitializer implements CommandLineRunner {

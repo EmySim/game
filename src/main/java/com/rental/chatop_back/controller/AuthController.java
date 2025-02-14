@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
 
+/**
+ * Controller for handling authentication-related requests.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -33,6 +36,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * Registers a new user.
+     *
+     * @param user The user to be registered.
+     * @return ResponseEntity with the registration status.
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         logger.info("Début de la méthode register pour l'email : " + user.getEmail());
@@ -54,6 +63,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Authenticates a user and generates a JWT token.
+     *
+     * @param request The authentication request containing email and password.
+     * @return ResponseEntity with the authentication response containing the JWT token.
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         logger.info("Début de la méthode login pour l'email : " + request.getEmail());
@@ -80,6 +95,12 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
+    /**
+     * Retrieves the details of the currently authenticated user.
+     *
+     * @param authentication The authentication object containing the user's details.
+     * @return ResponseEntity with the user details.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
         logger.info("Récupération des informations de l'utilisateur connecté.");
