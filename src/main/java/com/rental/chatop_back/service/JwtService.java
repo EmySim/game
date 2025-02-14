@@ -6,14 +6,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.Base64;
 
 /**
  * Service for handling JWT-related operations.
@@ -23,12 +22,8 @@ public class JwtService {
 
     private static final Logger LOGGER = Logger.getLogger(JwtService.class.getName());
 
-    private final Dotenv dotenv;
+    private final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
-    @Autowired
-    public JwtService(Dotenv dotenv) {
-        this.dotenv = dotenv;
-    }
 
     // Clé secrète chargée depuis les variables d'environnement
     private String getSecretKey() {

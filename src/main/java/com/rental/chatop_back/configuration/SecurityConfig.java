@@ -9,6 +9,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,7 +30,6 @@ import java.util.logging.Logger;
 public class SecurityConfig {
 
     private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
-    private final UserService userService;
     private final JwtFilter jwtFilter;
 
     // Centralisation des routes publiques
@@ -42,9 +42,16 @@ public class SecurityConfig {
             "/favicon.ico"
     );
 
-    public SecurityConfig(UserService userService, JwtFilter jwtFilter) {
-        this.userService = userService;
+    public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
+    }
+
+    /**
+     * Définition d'un UserDetailsService indépendant pour éviter la dépendance circulaire.
+     */
+    @Bean
+    public UserDetailsService userDetailsService(UserService userService) {
+        return userService::loadUserByUsername;
     }
 
     @Bean
@@ -85,19 +92,28 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configuration du fournisseur d'authentification.
+     */
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
+    /**
+     * Définition de l'AuthenticationManager.
+     */
     @Bean
-    public AuthenticationManager authenticationManager() {
-        return new ProviderManager(List.of(authenticationProvider()));
+    public AuthenticationManager authenticationManager(DaoAuthenticationProvider authenticationProvider) {
+        return new ProviderManager(List.of(authenticationProvider));
     }
 
+    /**
+     * Configuration des règles CORS.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         logger.info("Setting CORS configuration...");

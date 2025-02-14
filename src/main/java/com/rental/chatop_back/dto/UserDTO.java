@@ -8,7 +8,7 @@ public class UserDTO {
     private String name;
     private String password;
 
-    public UserDTO() {
+    public UserDTO(Long id, String name, String email) {
     }
 
     public UserDTO(String email, String name, String password) {
