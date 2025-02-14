@@ -1,13 +1,17 @@
 package com.rental.chatop_back.controller;
 
 import com.rental.chatop_back.dto.AuthRequest;
+import com.rental.chatop_back.dto.AuthResponse;
+import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
+import com.rental.chatop_back.service.AuthService;
 import com.rental.chatop_back.service.JwtService;
 import com.rental.chatop_back.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
@@ -20,11 +24,13 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserService userService;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService, AuthService authService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userService = userService;
+        this.authService = authService;
     }
 
     @PostMapping("/register")
@@ -48,8 +54,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/email")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         logger.info("Début de la méthode login pour l'email : " + request.getEmail());
 
         try {
@@ -58,27 +64,27 @@ public class AuthController {
             );
         } catch (Exception e) {
             logger.warning("Échec de l'authentification pour l'email : " + request.getEmail());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("Email ou mot de passe incorrect"));
         }
 
-        // ERREUR : jwtService.generateToken(request.getEmail());
         // Récupérer l'utilisateur depuis la base de données
         User user = userService.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // Passer l'objet `UserDetails` à generateToken()
+        // Générer un token JWT valide
         String token = jwtService.generateToken(user);
 
         logger.info("Token généré avec succès pour l'email : " + request.getEmail());
         logger.info("Fin de la méthode login");
 
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        logger.info("Récupération des informations de l'utilisateur connecté.");
 
-    @GetMapping("/register")
-    public ResponseEntity<String> getRegister() {
-        return ResponseEntity.ok("GET request to /api/auth/register is allowed.");
+        UserDTO userDTO = authService.getUserDetails(authentication.getName());
+        return ResponseEntity.ok(userDTO);
     }
-
 }
