@@ -46,14 +46,6 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-    /**
-     * Définition d'un UserDetailsService indépendant pour éviter la dépendance circulaire.
-     */
-    @Bean
-    public UserDetailsService userDetailsService(UserService userService) {
-        return userService::loadUserByUsername;
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -96,9 +88,9 @@ public class SecurityConfig {
      * Configuration du fournisseur d'authentification.
      */
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
+    public DaoAuthenticationProvider authenticationProvider(UserService userService) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

@@ -28,11 +28,12 @@ public class JwtFilter extends OncePerRequestFilter {
     private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.PUBLIC_ROUTES; // Routes publiques
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
 
-    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    public JwtFilter(JwtService jwtService) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override

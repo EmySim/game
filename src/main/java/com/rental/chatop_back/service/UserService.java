@@ -2,6 +2,7 @@ package com.rental.chatop_back.service;
 
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  * Service for handling user-related operations.
  */
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private static final Logger logger = Logger.getLogger(UserService.class.getName());
     private static final String EMAIL_ALREADY_USED_ERROR = "Cet email est déjà utilisé.";
@@ -75,6 +76,7 @@ public class UserService {
      * @return UserDetails containing the user details.
      * @throws UsernameNotFoundException if the user is not found.
      */
+    @Override
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) {
         logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
 
