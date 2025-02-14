@@ -27,11 +27,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
     private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.PUBLIC_ROUTES; // Routes publiques
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(
