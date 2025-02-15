@@ -1,6 +1,7 @@
 package com.rental.chatop_back.service;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -21,9 +22,7 @@ import java.util.logging.Logger;
 public class JwtService {
 
     private static final Logger LOGGER = Logger.getLogger(JwtService.class.getName());
-
     private final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-
 
     // Clé secrète chargée depuis les variables d'environnement
     private String getSecretKey() {
@@ -32,7 +31,6 @@ public class JwtService {
             LOGGER.severe("SECRET_KEY non configurée dans les variables d'environnement");
             throw new IllegalStateException("SECRET_KEY non configurée dans les variables d'environnement");
         }
-        LOGGER.info("Chargement de la clé secrète pour JWT avec succès.");
         return secretKey;
     }
 
@@ -62,69 +60,43 @@ public class JwtService {
     }
 
     /**
-     * Validates the given JWT token for the given user details.
-     *
-     * @param token The JWT token.
-     * @param userDetails The user details.
-     * @return True if the token is valid, false otherwise.
-     */
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        LOGGER.info("Vérification du token pour l'utilisateur : " + username);
-
-        if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
-            LOGGER.warning("Token invalide ou expiré pour : " + username);
-            return false;
-        }
-
-        LOGGER.info("Token valide pour l'utilisateur : " + username);
-        return true;
-    }
-
-    /**
-     * Validates the given JWT token.
-     *
-     * @param token The JWT token.
-     * @return True if the token is valid, false otherwise.
-     */
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            LOGGER.warning("Token invalide : " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Extracts the username from the given JWT token.
-     *
-     * @param token The JWT token.
-     * @return The username.
+     * Extracts the username from the JWT token.
      */
     public String extractUsername(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    /**
+     * Validates the given JWT token for the given user details.
+     * Throws a RuntimeException if the token is invalid or expired.
+     */
+    public void validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
+            throw new RuntimeException("Token invalide ou expiré.");
+        }
+    }
+
+    private Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractClaims(token).getExpiration().before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+    /**
+     * Retrieves the token from local storage.
+     *
+     * @return The token from local storage.
+     */
+    public String retrieveTokenFromLocalStorage() {
+        // Implement the logic to retrieve the token from local storage
+        // This is a placeholder implementation
+        return "token_from_local_storage";
     }
 }

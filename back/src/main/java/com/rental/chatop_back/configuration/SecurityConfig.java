@@ -13,6 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
@@ -21,10 +24,11 @@ import java.util.List;
 public class SecurityConfig {
 
     public static final List<String> PUBLIC_ROUTES = List.of(
-            "/api/auth/login",
+            "/api/auth/email",
             "/api/auth/register",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/favicon.ico"
     );
 
     public List<String> getPublicRoutes() {
@@ -40,7 +44,6 @@ public class SecurityConfig {
     // Bean pour gérer les détails des utilisateurs
     @Bean
     public UserDetailsService userDetailsService() {
-        // Vous pouvez remplacer cela par une implémentation spécifique (ex : service utilisateur)
         return email -> {
             throw new UnsupportedOperationException("Implémentez le UserDetailsService pour charger vos utilisateurs.");
         };
@@ -66,11 +69,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configuration CORS
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Gestion de session stateless
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ROUTES.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 );
+
         return http.build();
+    }
+
+    // Define a CorsConfigurationSource bean to specify allowed origins, methods, and headers
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:4200, "); // Add allowed origins
+        configuration.addAllowedMethod("*"); // Allow all HTTP methods
+        configuration.addAllowedHeader("*"); // Allow all headers
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
