@@ -21,10 +21,11 @@ import java.util.List;
 public class SecurityConfig {
 
     public static final List<String> PUBLIC_ROUTES = List.of(
-            "/api/auth/login",
+            "/api/auth/email",
             "/api/auth/register",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/favicon.ico"
     );
 
     public List<String> getPublicRoutes() {
@@ -40,7 +41,6 @@ public class SecurityConfig {
     // Bean pour gérer les détails des utilisateurs
     @Bean
     public UserDetailsService userDetailsService() {
-        // Vous pouvez remplacer cela par une implémentation spécifique (ex : service utilisateur)
         return email -> {
             throw new UnsupportedOperationException("Implémentez le UserDetailsService pour charger vos utilisateurs.");
         };
