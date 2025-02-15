@@ -5,10 +5,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -25,15 +24,15 @@ import java.util.logging.Logger;
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private final List<String> PUBLIC_ENDPOINTS = SecurityConfig.PUBLIC_ROUTES; // Routes publiques
-
+    private final List<String> PUBLIC_ENDPOINTS;
     private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    public JwtFilter(JwtService jwtService) {
+    // Constructeur avec injection des dépendances
+    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService, SecurityConfig securityConfig) {
         this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+        this.PUBLIC_ENDPOINTS = securityConfig.getPublicRoutes();
     }
 
     @Override
@@ -45,65 +44,51 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         logger.info("Requête entrante : " + requestURI);
 
-        // Ignorer le filtrage JWT pour les endpoints publics
-        if (PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::contains)) {
+        // Vérification si la route est publique
+        if (PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::startsWith)) {
             logger.info("Route publique détectée, filtrage JWT ignoré : " + requestURI);
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extraction du token dans l'en-tête Authorization
+        // Extraction de l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
-        logger.info("Valeur reçue pour Authorization: " + authHeader);
-        if (authHeader == null) {
-            logger.warning("Aucun en-tête Authorization reçu.");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warning("Aucun ou mauvais format de l'en-tête Authorization.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Erreur : Aucun token reçu.");
+            response.getWriter().write("Erreur : Aucun token valide reçu.");
             return;
         }
-        if (!authHeader.startsWith("Bearer ")) {
-            logger.warning("Format incorrect de l'en-tête Authorization.");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Erreur : Format de token invalide.");
-            return;
-        }
+        // Extraction du token (en supprimant "Bearer ")
+        String token = authHeader.substring(7);
 
-        // Extraire le token
-        String token = authHeader.substring(7); // Supprime "Bearer "
-        logger.info("Token reçu : " + token);
+        // Retrieve token from local storage if not present in the header
+        if (token == null || token.isEmpty()) {
+            token = jwtService.retrieveTokenFromLocalStorage();
+        }
 
         try {
-            // Extraction du nom d'utilisateur à partir du token JWT
             String username = jwtService.extractUsername(token);
             logger.info("Nom d'utilisateur extrait du token : " + username);
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             logger.info("Utilisateur chargé : " + username);
 
-            // Validation du token
-            if (!jwtService.validateToken(token, userDetails)) {
-                logger.warning("Token invalide.");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Erreur : Token invalide");
-                return;
-            }
+            jwtService.validateToken(token, userDetails); // Utilisation de la nouvelle méthode
 
-            logger.info("Token validé pour l'utilisateur : " + username);
+            logger.info("Token validé avec succès pour l'utilisateur : " + username);
 
-            // Authentification avec Spring Security
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            logger.info("Utilisateur authentifié avec succès : " + username);
 
-        } catch (Exception e) {
-            logger.severe("Erreur lors de la validation du token JWT : " + e.getMessage());
+        } catch (RuntimeException e) { // Capture l'exception levée par validateToken()
+            logger.severe("Erreur lors de la validation du token : " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Erreur : Échec de la validation du token");
+            response.getWriter().write("Erreur : " + e.getMessage());
             return;
         }
 
-        // Poursuivre avec la chaîne de filtres
         filterChain.doFilter(request, response);
     }
 }
