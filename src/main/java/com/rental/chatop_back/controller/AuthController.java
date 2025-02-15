@@ -69,7 +69,7 @@ public class AuthController {
      * @param request The authentication request containing email and password.
      * @return ResponseEntity with the authentication response containing the JWT token.
      */
-    @PostMapping("/login")
+    @PostMapping("/email")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         logger.info("Début de la méthode login pour l'email : " + request.getEmail());
 
