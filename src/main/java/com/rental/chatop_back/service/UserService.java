@@ -1,5 +1,6 @@
 package com.rental.chatop_back.service;
 
+import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,11 +32,12 @@ public class UserService implements UserDetailsService {
     /**
      * Registers a new user.
      *
-     * @param user The user to be registered.
+     * @param userDTO The user to be registered.
      */
-    public void register(User user) {
+    public void register(UserDTO userDTO) {
         try {
-            validateEmailUniqueness(user.getEmail());
+            validateEmailUniqueness(userDTO.getEmail());
+            User user = convertToEntity(userDTO);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             logger.info("Utilisateur enregistré avec succès : " + user.getEmail());
@@ -95,4 +97,28 @@ public class UserService implements UserDetailsService {
                 Collections.emptyList() // Pas de rôles dans cet exemple
         );
     }
+    /**
+     * Converts a UserDTO to a User entity.
+     *
+     * @param userDTO The UserDTO to be converted.
+     * @return The converted User entity.
+     */
+    private User convertToEntity(UserDTO userDTO) {
+        return new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
+    }
+    /**
+     * Retrieves user details by ID.
+     *
+     * @param id The ID of the user to retrieve.
+     * @return UserDTO containing the user details.
+     */
+    public UserDTO getUserDetailsById(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return null;
+        }
+        User user = optionalUser.get();
+        return new UserDTO(user.getEmail(), user.getName(), user.getPassword());
+    }
+
 }
