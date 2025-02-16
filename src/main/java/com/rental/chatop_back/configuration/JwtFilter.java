@@ -44,6 +44,12 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         logger.info("Requête entrante : " + requestURI);
 
+        // Handle CORS preflight requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
         // Vérification si la route est publique
         if (PUBLIC_ROUTES.stream().anyMatch(requestURI::startsWith)) {
             logger.info("Route publique détectée, filtrage JWT ignoré : " + requestURI);
