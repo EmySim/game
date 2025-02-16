@@ -106,6 +106,19 @@ public class UserService implements UserDetailsService {
     private User convertToEntity(UserDTO userDTO) {
         return new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
     }
-
+    /**
+     * Retrieves user details by ID.
+     *
+     * @param id The ID of the user to retrieve.
+     * @return UserDTO containing the user details.
+     */
+    public UserDTO getUserDetailsById(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return null;
+        }
+        User user = optionalUser.get();
+        return new UserDTO(user.getEmail(), user.getName(), user.getPassword());
+    }
 
 }
