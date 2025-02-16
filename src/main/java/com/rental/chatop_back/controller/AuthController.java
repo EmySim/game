@@ -89,15 +89,13 @@ public class AuthController {
         // Générer un token JWT valide
         String token = jwtService.generateToken(user);
 
-        // Retrieve token from local storage if not present in the header
-        if (token == null || token.isEmpty()) {
-            token = jwtService.retrieveTokenFromLocalStorage();
-        }
+        // Ensure the token is in the correct format "Bearer <token>"
+        String formattedToken = "Bearer " + token;
 
         logger.info("Token généré avec succès pour l'email : " + request.getEmail());
         logger.info("Fin de la méthode login");
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(formattedToken));
     }
 
     /**

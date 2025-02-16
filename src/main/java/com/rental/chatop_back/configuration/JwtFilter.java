@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private final List<String> PUBLIC_ENDPOINTS;
+    private final List<String> PUBLIC_ROUTES;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
     public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService, SecurityConfig securityConfig) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
-        this.PUBLIC_ENDPOINTS = securityConfig.getPublicRoutes();
+        this.PUBLIC_ROUTES = securityConfig.getPublicRoutes();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.info("Requête entrante : " + requestURI);
 
         // Vérification si la route est publique
-        if (PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::startsWith)) {
+        if (PUBLIC_ROUTES.stream().anyMatch(requestURI::startsWith)) {
             logger.info("Route publique détectée, filtrage JWT ignoré : " + requestURI);
             filterChain.doFilter(request, response);
             return;
@@ -61,11 +61,6 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         // Extraction du token (en supprimant "Bearer ")
         String token = authHeader.substring(7);
-
-        // Retrieve token from local storage if not present in the header
-        if (token == null || token.isEmpty()) {
-            token = jwtService.retrieveTokenFromLocalStorage();
-        }
 
         try {
             String username = jwtService.extractUsername(token);
