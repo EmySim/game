@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private final List<String> PUBLIC_ROUTES;
+    private final List<String> PUBLIC_ROUTES ;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -47,6 +47,16 @@ public class JwtFilter extends OncePerRequestFilter {
         // Vérification si la route est publique
         if (PUBLIC_ROUTES.stream().anyMatch(requestURI::startsWith)) {
             logger.info("Route publique détectée, filtrage JWT ignoré : " + requestURI);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Vérifie si la requête correspond à l'un des préfixes
+        if (requestURI.startsWith("/v3/api-docs") ||
+                requestURI.startsWith("/api/auth/email") ||
+                requestURI.startsWith("/favicon.ico") ||
+                requestURI.startsWith("/api/auth/register")) {
+            logger.info(requestURI + " est une route publique et ne nécessite pas d'en-tête Authorization.");
             filterChain.doFilter(request, response);
             return;
         }

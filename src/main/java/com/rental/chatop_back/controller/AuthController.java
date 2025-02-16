@@ -39,21 +39,22 @@ public class AuthController {
     /**
      * Registers a new user.
      *
-     * @param user The user to be registered.
+     * @param userDTO The user to be registered.
      * @return ResponseEntity with the registration status.
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        logger.info("Début de la méthode register pour l'email : " + user.getEmail());
+    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+        logger.info("Début de la méthode register pour l'email : " + userDTO.getEmail());
 
         try {
-            if (userService.findByEmail(user.getEmail()).isPresent()) {
-                logger.warning("Échec de l'inscription : email déjà utilisé - " + user.getEmail());
+            if (userService.findByEmail(userDTO.getEmail()).isPresent()) {
+                logger.warning("Échec de l'inscription : email déjà utilisé - " + userDTO.getEmail());
                 return ResponseEntity.badRequest().body("Email déjà utilisé !");
             }
 
-            userService.register(user);
-            logger.info("Utilisateur créé avec succès : " + user.getEmail());
+            User user = new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
+            userService.register(userDTO);
+            logger.info("Utilisateur créé avec succès : " + userDTO.getEmail());
 
             logger.info("Fin de la méthode register");
             return ResponseEntity.ok("Utilisateur créé !");
