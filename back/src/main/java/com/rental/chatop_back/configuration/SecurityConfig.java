@@ -1,6 +1,5 @@
 package com.rental.chatop_back.configuration;
 
-import com.rental.chatop_back.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,10 +19,8 @@ import java.util.logging.Logger;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, UserService userService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, UserDetailsService userDetailsService) throws Exception {
         logger.info("Configuration de la chaîne de filtres de sécurité");
         http
                 .csrf(csrf -> csrf.disable())
@@ -63,6 +60,4 @@ public class SecurityConfig {
         logger.info("Création de l'AuthenticationManager");
         return configuration.getAuthenticationManager();
     }
-
-
 }
