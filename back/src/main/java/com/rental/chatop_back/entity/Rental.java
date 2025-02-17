@@ -19,136 +19,30 @@ public class Rental {
     private String location;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Date createdAt = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Date updatedAt = new Date();
 
-    // Getters and setters
+    // Getters et setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    /**
-     * Gets the ID of the rental.
-     *
-     * @return the ID of the rental.
-     */
-    public Long getId() {
-        return id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    /**
-     * Sets the ID of the rental.
-     *
-     * @param id the ID of the rental.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    /**
-     * Gets the name of the rental.
-     *
-     * @return the name of the rental.
-     */
-    public String getName() {
-        return name;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    /**
-     * Sets the name of the rental.
-     *
-     * @param name the name of the rental.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    /**
-     * Gets the description of the rental.
-     *
-     * @return the description of the rental.
-     */
-    public String getDescription() {
-        return description;
-    }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    /**
-     * Sets the description of the rental.
-     *
-     * @param description the description of the rental.
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Gets the price of the rental.
-     *
-     * @return the price of the rental.
-     */
-    public double getPrice() {
-        return price;
-    }
-
-    /**
-     * Sets the price of the rental.
-     *
-     * @param price the price of the rental.
-     */
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    /**
-     * Gets the location of the rental.
-     *
-     * @return the location of the rental.
-     */
-    public String getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets the location of the rental.
-     *
-     * @param location the location of the rental.
-     */
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    /**
-     * Gets the creation date of the rental.
-     *
-     * @return the creation date of the rental.
-     */
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * Sets the creation date of the rental.
-     *
-     * @param createdAt the creation date of the rental.
-     */
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    /**
-     * Gets the last updated date of the rental.
-     *
-     * @return the last updated date of the rental.
-     */
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    /**
-     * Sets the last updated date of the rental.
-     *
-     * @param updatedAt the last updated date of the rental.
-     */
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }

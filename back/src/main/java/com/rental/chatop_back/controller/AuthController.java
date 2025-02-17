@@ -1,7 +1,7 @@
 package com.rental.chatop_back.controller;
 
-import com.rental.chatop_back.dto.AuthRequest;
-import com.rental.chatop_back.dto.AuthResponse;
+import com.rental.chatop_back.dto.AuthRequestDTO;
+import com.rental.chatop_back.dto.AuthResponseDTO;
 import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.service.AuthService;
@@ -71,33 +71,34 @@ public class AuthController {
      * @return ResponseEntity with the authentication response containing the JWT token.
      */
     @PostMapping("/email")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
         logger.info("Début de la méthode login pour l'email : " + request.getEmail());
 
         try {
-            authenticationManager.authenticate(
+            // Tentative d'authentification
+            Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
+
+            // Récupération de l'utilisateur depuis la base de données
+            User user = userService.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+            // Générer un token JWT valide
+            String token = jwtService.generateToken(user);
+
+            // Réponse avec le token sous forme "Bearer <token>"
+            String formattedToken = "Bearer " + token;
+
+            logger.info("Token généré avec succès pour l'email : " + request.getEmail());
+            return ResponseEntity.ok(new AuthResponseDTO(formattedToken));
+
         } catch (Exception e) {
             logger.warning("Échec de l'authentification pour l'email : " + request.getEmail());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("Email ou mot de passe incorrect"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponseDTO("Email ou mot de passe incorrect"));
         }
-
-        // Récupérer l'utilisateur depuis la base de données
-        User user = userService.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        // Générer un token JWT valide
-        String token = jwtService.generateToken(user);
-
-        // Ensure the token is in the correct format "Bearer <token>"
-        String formattedToken = "Bearer " + token;
-
-        logger.info("Token généré avec succès pour l'email : " + request.getEmail());
-        logger.info("Fin de la méthode login");
-
-        return ResponseEntity.ok(new AuthResponse(formattedToken));
     }
+
 
     /**
      * Retrieves the details of the currently authenticated user.

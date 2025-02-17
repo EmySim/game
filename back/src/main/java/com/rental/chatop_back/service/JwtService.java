@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Service for handling JWT-related operations.
+ * Service pour gérer les opérations liées aux JWT.
  */
 @Service
 public class JwtService {
@@ -24,7 +23,6 @@ public class JwtService {
     private static final Logger LOGGER = Logger.getLogger(JwtService.class.getName());
     private final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
-    // Clé secrète chargée depuis les variables d'environnement
     private String getSecretKey() {
         String secretKey = dotenv.get("JWT_SECRET");
         if (secretKey == null || secretKey.isEmpty()) {
@@ -39,10 +37,10 @@ public class JwtService {
     }
 
     /**
-     * Generates a JWT token for the given user details.
+     * Génère un token JWT pour l'utilisateur.
      *
-     * @param userDetails The user details.
-     * @return The generated JWT token.
+     * @param userDetails Les détails de l'utilisateur.
+     * @return Le token JWT généré.
      */
     public String generateToken(UserDetails userDetails) {
         LOGGER.info("Génération du token pour l'utilisateur : " + userDetails.getUsername());
@@ -59,17 +57,10 @@ public class JwtService {
                 .compact();
     }
 
-    /**
-     * Extracts the username from the JWT token.
-     */
     public String extractUsername(String token) {
         return extractClaims(token).getSubject();
     }
 
-    /**
-     * Validates the given JWT token for the given user details.
-     * Throws a RuntimeException if the token is invalid or expired.
-     */
     public void validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
@@ -87,16 +78,5 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
-    }
-
-    /**
-     * Retrieves the token from local storage.
-     *
-     * @return The token from local storage.
-     */
-    public String retrieveTokenFromLocalStorage() {
-        // Implement the logic to retrieve the token from local storage
-        // This is a placeholder implementation
-        return "token_from_local_storage";
     }
 }

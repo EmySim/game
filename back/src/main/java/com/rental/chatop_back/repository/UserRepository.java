@@ -2,14 +2,12 @@ package com.rental.chatop_back.repository;
 
 import com.rental.chatop_back.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 /**
  * Repository interface for User entity.
+ * Provides custom methods for user lookup by email.
  */
-@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**

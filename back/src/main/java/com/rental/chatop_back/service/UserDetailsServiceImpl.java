@@ -12,6 +12,9 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+/**
+ * Service pour charger les détails de l'utilisateur pour l'authentification.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -38,7 +41,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.emptyList() // Pas de rôles pour le moment
+                Collections.emptyList() // Pas de rôles pour l'instant
         );
     }
 }

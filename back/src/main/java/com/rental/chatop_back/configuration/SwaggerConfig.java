@@ -22,6 +22,11 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Chatop API")
                         .version("1.0")
-                        .description("Documentation de l'API pour Chatop, plateforme de location"));
-    }
+                        .description("Documentation de l'API pour Chatop, plateforme de location"))
+                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+                .components(new Components()
+                        .addSecuritySchemes("BearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
 }

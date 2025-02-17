@@ -1,6 +1,5 @@
 package com.rental.chatop_back.configuration;
 
-import com.rental.chatop_back.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,16 +19,16 @@ import java.util.logging.Logger;
  * Filtre JWT appliqué à chaque requête pour authentifier les utilisateurs.
  */
 @Component
-public class JwtFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
-    private final JwtService jwtService;
+    private static final Logger logger = Logger.getLogger(JwtAuthenticationFilter.class.getName());
+    private final com.rental.chatop_back.service.JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     /**
      * Constructeur avec injection des dépendances.
      */
-    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(com.rental.chatop_back.service.JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }

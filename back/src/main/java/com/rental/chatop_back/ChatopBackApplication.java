@@ -6,14 +6,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class ChatopBackApplication {
+
 	public static void main(String[] args) {
 
-		// Charger les variables d'environnement depuis le fichier `.env`
+		// Charger les variables d'environnement depuis le fichier .env
 		Dotenv dotenv = Dotenv.configure()
-				.directory("./") // Spécifie l'emplacement du fichier .env (racine du projet)
+				.directory("./")  // Spécifie l'emplacement du fichier .env
 				.load();
-
-
 
 		// Récupérer les variables d'environnement
 		String databaseUrl = dotenv.get("DATABASE_URL");
@@ -27,13 +26,14 @@ public class ChatopBackApplication {
 		verifyEnvironmentVariable("DATABASE_PASSWORD", databasePassword);
 		verifyEnvironmentVariable("JWT_SECRET", jwtSecret);
 
-		// Configurer les propriétés système pour le framework Spring
+		// Configurer les propriétés système pour Spring
 		System.setProperty("spring.datasource.url", databaseUrl);
 		System.setProperty("spring.datasource.username", databaseUsername);
 		System.setProperty("spring.datasource.password", databasePassword);
+		System.setProperty("jwt.secret", jwtSecret);
 
-		// Log statement to indicate successful loading of environment variables
-		System.out.println("Environment variables loaded successfully1.");
+		// Log statement pour indiquer le succès du chargement des variables d'environnement
+		System.out.println("Variables d'environnement chargées avec succès!");
 
 		// Démarrer l'application Spring Boot
 		SpringApplication.run(ChatopBackApplication.class, args);

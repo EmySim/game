@@ -1,6 +1,5 @@
 package com.rental.chatop_back.util;
 
-import com.rental.chatop_back.entity.Role;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;

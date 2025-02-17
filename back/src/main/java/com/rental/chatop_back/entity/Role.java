@@ -1,8 +1,9 @@
 package com.rental.chatop_back.entity;
 
 /**
- * Enum representing the roles of users in the system.
+ * Enum representing roles for users.
  */
 public enum Role {
-    USER, ADMIN
+    USER, // Utilisateur classique
+    ADMIN // Administrateur, à ajouter si nécessaire
 }

@@ -42,7 +42,7 @@ public class RentalController {
             return ResponseEntity.ok(rentals);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Erreur lors de la récupération des locations", e);
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);  // Ajoute un message d'erreur ici si tu veux plus de détails
         }
     }
 }

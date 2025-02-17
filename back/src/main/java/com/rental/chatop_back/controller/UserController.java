@@ -33,9 +33,10 @@ public class UserController {
         UserDTO userDTO = userServiceDetail.getUserDetailsById(id);
         if (userDTO == null) {
             logger.warning("User not found for ID: " + id);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Ajout d'une réponse explicite en cas d'absence d'utilisateur
         }
         logger.info("Successfully retrieved user details for ID: " + id);
         return ResponseEntity.ok(userDTO);
     }
+
 }
