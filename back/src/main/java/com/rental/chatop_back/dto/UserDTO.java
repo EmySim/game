@@ -23,6 +23,20 @@ public class UserDTO {
         this.password = password;
     }
 
+    // New constructor with three parameters
+    public UserDTO(Long id, String email, String name) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+    }
+
+    // Constructeur avec trois arguments (email, name, password)
+    public UserDTO(String email, String name, String password) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+    }
+
     // Constructeur avec un objet User
     public UserDTO(User user) {
         if (user != null) {
@@ -35,7 +49,7 @@ public class UserDTO {
 
     // Méthode pour transformer ce DTO en une entité User
     public User toEntity() {
-        return new User(this.id, this.email, this.name, this.password);  // Assumer que User a un constructeur avec id
+        return new User(this.email, this.name, this.password);  // Assumer que User a un constructeur avec id
     }
 
     // Getters et setters

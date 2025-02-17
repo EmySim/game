@@ -1,5 +1,6 @@
 package com.rental.chatop_back.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

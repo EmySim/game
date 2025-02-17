@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * Controller for handling authentication-related requests.
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private static final Logger logger = Logger.getLogger(AuthController.class.getName());
@@ -52,7 +52,6 @@ public class AuthController {
                 return ResponseEntity.badRequest().body("Email déjà utilisé !");
             }
 
-            User user = new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
             userService.register(userDTO);
             logger.info("Utilisateur créé avec succès : " + userDTO.getEmail());
 
@@ -70,7 +69,7 @@ public class AuthController {
      * @param request The authentication request containing email and password.
      * @return ResponseEntity with the authentication response containing the JWT token.
      */
-    @PostMapping("/email")
+    @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
         logger.info("Début de la méthode login pour l'email : " + request.getEmail());
 

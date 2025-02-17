@@ -2,6 +2,7 @@ package com.rental.chatop_back.controller;
 
 import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.service.UserServiceDetail;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Ajout d'une réponse explicite en cas d'absence d'utilisateur
         }
         logger.info("Successfully retrieved user details for ID: " + id);
-        return ResponseEntity.ok(userDTO);
+        return ResponseEntity.ok(new UserDTO(userDTO.getId(), userDTO.getEmail(), userDTO.getName()));
     }
 
 }

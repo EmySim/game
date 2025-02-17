@@ -3,10 +3,13 @@ package com.rental.chatop_back.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
+import java.util.Base64;
 
 /**
  * Utilitaire pour gérer la création et la validation des tokens JWT.
@@ -14,8 +17,11 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+    private final Key signingKey;
+
+    public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+        this.signingKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
+    }
 
     @Value("${jwt.expiration}")
     private long expirationTime;
@@ -31,7 +37,7 @@ public class JwtUtil {
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -65,8 +71,9 @@ public class JwtUtil {
      * @return Les réclamations du JWT.
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }

@@ -49,9 +49,11 @@ public class User implements UserDetails {
 
     // Constructeur pour un nouvel utilisateur
     public User(String email, String name, String password) {
+        //this.id = id;
         this.email = email;
         this.name = name;
         this.password = password;
+        this.role = role.USER;
     }
 
     // Préparation avant persistance dans la base de données

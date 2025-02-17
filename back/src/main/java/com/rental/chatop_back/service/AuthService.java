@@ -114,7 +114,7 @@ public class AuthService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-            return new UserDTO(user.getId(), user.getName(), user.getEmail());
+            return new UserDTO(user.getId(), user.getEmail(), user.getName());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Erreur lors de la récupération des détails : " + e.getMessage(), e);
             throw new RuntimeException("Erreur lors de la récupération des détails de l'utilisateur", e);

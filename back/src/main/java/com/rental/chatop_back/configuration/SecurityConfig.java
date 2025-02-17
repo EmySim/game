@@ -11,15 +11,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.logging.Logger;
 
 @Configuration
 @EnableWebSecurity
+@RequestMapping("/auth")
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, UserDetailsServiceImpl userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Configuration de la chaîne de filtres de sécurité");
         http
                 .csrf(csrf -> csrf.disable())
@@ -40,14 +48,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
-
-    // Injection du JwtFilter via le constructeur
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         logger.info("Création du PasswordEncoder avec BCryptPasswordEncoder");
@@ -55,8 +55,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        logger.info("Création de l'AuthenticationManager");
-        return configuration.getAuthenticationManager();
-    }
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+            logger.info("Création de l'AuthenticationManager");
+            return authenticationConfiguration.getAuthenticationManager();
+        }
+
+        private static final Logger logger = Logger.getLogger(SecurityConfig.class.getName());
 }

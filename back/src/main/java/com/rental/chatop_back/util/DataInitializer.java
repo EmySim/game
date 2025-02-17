@@ -1,6 +1,7 @@
 package com.rental.chatop_back.util;
 
 import com.rental.chatop_back.entity.User;
+import com.rental.chatop_back.entity.Role;
 import com.rental.chatop_back.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +24,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (userRepository.count() == 0) {
-            userRepository.save(new User(null, "admin", passwordEncoder.encode("adminpass"), Role.ADMIN));
-            userRepository.save(new User(null, "user", passwordEncoder.encode("userpass"), Role.USER));
+            userRepository.save(new User("admin@email.com", "Admin Name", passwordEncoder.encode("adminpass"), Role.ADMIN));
+            userRepository.save(new User("user@email.com", "User Name", passwordEncoder.encode("userpass"), Role.USER));
             System.out.println("✅ Utilisateurs injectés !");
         }
     }

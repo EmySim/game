@@ -2,7 +2,6 @@ package com.rental.chatop_back.service;
 
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
