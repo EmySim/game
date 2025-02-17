@@ -1,7 +1,7 @@
 package com.rental.chatop_back.controller;
 
 import com.rental.chatop_back.dto.UserDTO;
-import com.rental.chatop_back.service.UserService;
+import com.rental.chatop_back.service.UserServiceDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 public class UserController {
 
     private static final Logger logger = Logger.getLogger(UserController.class.getName());
-    private final UserService userService;
+    private final UserServiceDetail userServiceDetail;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserServiceDetail userServiceDetail) {
+        this.userServiceDetail = userServiceDetail;
     }
 
     /**
@@ -30,7 +30,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserDetails(@PathVariable Long id) {
         logger.info("Incoming request to get user details for ID: " + id);
-        UserDTO userDTO = userService.getUserDetailsById(id);
+        UserDTO userDTO = userServiceDetail.getUserDetailsById(id);
         if (userDTO == null) {
             logger.warning("User not found for ID: " + id);
             return ResponseEntity.notFound().build();
