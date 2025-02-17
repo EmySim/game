@@ -2,17 +2,16 @@ package com.rental.chatop_back.service;
 
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-/**
- * Implementation of UserDetailsService for authentication.
- */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -24,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -34,12 +33,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         User user = optionalUser.get();
-        logger.info("✅ Utilisateur trouvé : " + user.getEmail());
+        logger.info("Utilisateur trouvé : " + user.getEmail());
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.emptyList() // Pas de rôles dans cet exemple
+                Collections.emptyList() // Pas de rôles pour le moment
         );
     }
 }

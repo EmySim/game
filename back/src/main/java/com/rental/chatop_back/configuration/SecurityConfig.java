@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, UserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, UserDetailsServiceImpl userDetailsService) throws Exception {
         logger.info("Configuration de la chaîne de filtres de sécurité");
         http
                 .csrf(csrf -> csrf.disable())
