@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "build": "cd back && npm install && npm run build && cd ../front && npm install && npm run build"
+  }
+}

@@ -1,7 +1,6 @@
 package com.rental.chatop_back.configuration;
 
 import com.rental.chatop_back.service.JwtService;
-import com.rental.chatop_back.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,14 +24,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtFilter.class.getName());
     private final JwtService jwtService;
-    private final UserService userService;
+    private final UserDetailsService userDetailsService;
 
     /**
      * Constructeur avec injection des dépendances.
      */
-    public JwtFilter(JwtService jwtService, UserService userService) {
+    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
-        this.userService = userService;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -60,7 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             // Extraction du nom d'utilisateur depuis le token
             String username = jwtService.extractUsername(token);
-            UserDetails userDetails = userService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             // Validation du token
             jwtService.validateToken(token, userDetails);
 
