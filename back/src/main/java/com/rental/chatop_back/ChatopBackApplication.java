@@ -13,6 +13,8 @@ public class ChatopBackApplication {
 				.directory("./") // Spécifie l'emplacement du fichier .env (racine du projet)
 				.load();
 
+
+
 		// Récupérer les variables d'environnement
 		String databaseUrl = dotenv.get("DATABASE_URL");
 		String databaseUsername = dotenv.get("DATABASE_USERNAME");
