@@ -39,21 +39,22 @@ public class AuthController {
     /**
      * Registers a new user.
      *
-     * @param user The user to be registered.
+     * @param userDTO The user to be registered.
      * @return ResponseEntity with the registration status.
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        logger.info("Début de la méthode register pour l'email : " + user.getEmail());
+    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+        logger.info("Début de la méthode register pour l'email : " + userDTO.getEmail());
 
         try {
-            if (userService.findByEmail(user.getEmail()).isPresent()) {
-                logger.warning("Échec de l'inscription : email déjà utilisé - " + user.getEmail());
+            if (userService.findByEmail(userDTO.getEmail()).isPresent()) {
+                logger.warning("Échec de l'inscription : email déjà utilisé - " + userDTO.getEmail());
                 return ResponseEntity.badRequest().body("Email déjà utilisé !");
             }
 
-            userService.register(user);
-            logger.info("Utilisateur créé avec succès : " + user.getEmail());
+            User user = new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
+            userService.register(userDTO);
+            logger.info("Utilisateur créé avec succès : " + userDTO.getEmail());
 
             logger.info("Fin de la méthode register");
             return ResponseEntity.ok("Utilisateur créé !");
@@ -89,15 +90,13 @@ public class AuthController {
         // Générer un token JWT valide
         String token = jwtService.generateToken(user);
 
-        // Retrieve token from local storage if not present in the header
-        if (token == null || token.isEmpty()) {
-            token = jwtService.retrieveTokenFromLocalStorage();
-        }
+        // Ensure the token is in the correct format "Bearer <token>"
+        String formattedToken = "Bearer " + token;
 
         logger.info("Token généré avec succès pour l'email : " + request.getEmail());
         logger.info("Fin de la méthode login");
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(formattedToken));
     }
 
     /**
