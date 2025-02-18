@@ -30,7 +30,7 @@ Before you begin, ensure you have the following installed on your machine:
    JWT_SECRET=JWT_SECRET2025!JWT_SECRET2025!JWT_SECRET2025!
    ```
 
-3. **Update the `application.properties` file in `src/main/resources` with your database configuration:**
+3. **Ensure the MySQL server is running and accessible at the specified `DATABASE_URL`.**
 
    ```properties
    spring.datasource.url=${DATABASE_URL}

@@ -50,6 +50,13 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
+        <!-- MySQL JDBC driver -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.26</version>
+        </dependency>
+
         <!-- JWT AUTHENTICATION -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
