@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -18,6 +20,8 @@ import java.util.logging.Logger;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private static final Logger logger = Logger.getLogger(UserDetailsServiceImpl.class.getName());
+    
+    @Autowired
     private final UserRepository userRepository;
 
     public UserDetailsServiceImpl(UserRepository userRepository) {
@@ -25,6 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) {
         logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
 

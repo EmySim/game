@@ -45,15 +45,22 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.USER;  // Valeur par défaut ROLE.USER
+    private Role role;  // Valeur par défaut ROLE.USER
 
     // Constructeur pour un nouvel utilisateur
     public User(String email, String name, String password) {
-        //this.id = id;
         this.email = email;
         this.name = name;
         this.password = password;
-        this.role = role.USER;
+        this.role = Role.USER;
+    }
+
+    // Nouveau constructeur pour accepter un paramètre Role
+    public User(String email, String name, String password, Role role) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.role = role;
     }
 
     // Préparation avant persistance dans la base de données

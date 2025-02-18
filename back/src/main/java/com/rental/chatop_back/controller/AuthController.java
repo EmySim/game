@@ -29,7 +29,8 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService, AuthService authService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService,
+            AuthService authService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userService = userService;
@@ -59,7 +60,8 @@ public class AuthController {
             return ResponseEntity.ok("Utilisateur créé !");
         } catch (Exception e) {
             logger.severe("Erreur lors de l'inscription de l'utilisateur : " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de l'inscription de l'utilisateur");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'inscription de l'utilisateur");
         }
     }
 
@@ -67,7 +69,8 @@ public class AuthController {
      * Authenticates a user and generates a JWT token.
      *
      * @param request The authentication request containing email and password.
-     * @return ResponseEntity with the authentication response containing the JWT token.
+     * @return ResponseEntity with the authentication response containing the JWT
+     *         token.
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
@@ -75,9 +78,8 @@ public class AuthController {
 
         try {
             // Tentative d'authentification
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             // Récupération de l'utilisateur depuis la base de données
             User user = userService.findByEmail(request.getEmail())
@@ -94,15 +96,16 @@ public class AuthController {
 
         } catch (Exception e) {
             logger.warning("Échec de l'authentification pour l'email : " + request.getEmail());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponseDTO("Email ou mot de passe incorrect"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponseDTO("Email ou mot de passe incorrect"));
         }
     }
-
 
     /**
      * Retrieves the details of the currently authenticated user.
      *
-     * @param authentication The authentication object containing the user's details.
+     * @param authentication The authentication object containing the user's
+     *                       details.
      * @return ResponseEntity with the user details.
      */
     @GetMapping("/me")
