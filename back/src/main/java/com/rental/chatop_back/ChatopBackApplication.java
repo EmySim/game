@@ -5,6 +5,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+
+import javax.sql.DataSource;
+
 @SpringBootApplication
 public class ChatopBackApplication {
 
@@ -33,5 +39,17 @@ public class ChatopBackApplication {
 				System.exit(1); // Interrompt le démarrage en cas de variable manquante
 			}
 		};
+	}
+
+	/**
+	 * Configuration du DataSource pour la connexion à la base de données.
+	 */
+	@Bean
+	public DataSource dataSource() {
+		return DataSourceBuilder.create()
+				.url(VariablesUtil.getDatabaseUrl())
+				.username(VariablesUtil.getDatabaseUsername())
+				.password(VariablesUtil.getDatabasePassword())
+				.build();
 	}
 }
