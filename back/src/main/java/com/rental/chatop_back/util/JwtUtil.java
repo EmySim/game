@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.Base64;
+import java.util.logging.Logger;
 
 /**
  * Utilitaire pour gérer la création et la validation des tokens JWT.
@@ -17,10 +18,16 @@ import java.util.Base64;
 @Component
 public class JwtUtil {
 
+    private static final Logger LOGGER = Logger.getLogger(JwtUtil.class.getName());
     private final Key signingKey;
 
     public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+        if (secretKey == null || secretKey.isEmpty()) {
+            LOGGER.severe("La clé secrète JWT n'est pas définie ou est vide.");
+            throw new IllegalArgumentException("La clé secrète JWT n'est pas définie ou est vide.");
+        }
         this.signingKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
+        LOGGER.info("La clé secrète JWT a été définie avec succès.");
     }
 
     @Value("${jwt.expiration}")

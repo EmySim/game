@@ -47,6 +47,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;  // Valeur par défaut ROLE.USER
 
+    // **IMPORTANT** : Constructeur par défaut requis par Hibernate
+    public User() {
+        this.role = Role.USER; // Valeur par défaut (ROLE.USER)
+    }
+
     // Constructeur pour un nouvel utilisateur
     public User(String email, String name, String password) {
         this.email = email;
@@ -109,11 +114,22 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true; // Toujours actif
+    }
+
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true; // Toujours non bloqué
+    }
+
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true; // Toujours valide
+    }
+
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true; // Toujours activé
+    }
 }
