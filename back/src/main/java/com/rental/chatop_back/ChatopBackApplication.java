@@ -1,15 +1,14 @@
 package com.rental.chatop_back;
 
-import com.rental.chatop_back.util.VariablesUtil;
+import javax.sql.DataSource;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
 
-import javax.sql.DataSource;
+import com.rental.chatop_back.util.VariablesUtil;
 
 @SpringBootApplication
 public class ChatopBackApplication {
@@ -18,20 +17,17 @@ public class ChatopBackApplication {
 		SpringApplication.run(ChatopBackApplication.class, args);
 	}
 
-	/**
-	 * Vérifie que toutes les variables essentielles sont définies au démarrage.
-	 * Si une variable est manquante, le démarrage est interrompu.
-	 */
+	// Vérifie que toutes les variables essentielles sont définies au démarrage.
 	public CommandLineRunner diagnosticRunner() {
 		return args -> {
 			System.out.println("=== Vérification des variables de configuration ===");
 
 			try {
-				System.out.println("Database URL : " + VariablesUtil.getDatabaseUrl());
-				System.out.println("Database Username : " + VariablesUtil.getDatabaseUsername());
-				System.out.println("Database Password : " + VariablesUtil.obfuscate(VariablesUtil.getDatabasePassword()));
-				System.out.println("JWT Secret : " + VariablesUtil.obfuscate(VariablesUtil.getJwtSecret()));
-				System.out.println("JWT Expiration : " + VariablesUtil.getJwtExpiration() + " ms");
+				printEnvVariable("DATABASE_URL", VariablesUtil.getDatabaseUrl());
+				printEnvVariable("DATABASE_USERNAME", VariablesUtil.getDatabaseUsername());
+				printEnvVariable("DATABASE_PASSWORD", VariablesUtil.obfuscate(VariablesUtil.getDatabasePassword()));
+				printEnvVariable("JWT_SECRET", VariablesUtil.obfuscate(VariablesUtil.getJwtSecret()));
+				printEnvVariable("JWT_EXPIRATION", VariablesUtil.getJwtExpiration() + " ms");
 
 				System.out.println("TOUTES LES VARIABLES SONT PRÉSENTES ET VALIDÉES !");
 			} catch (IllegalStateException e) {
@@ -41,9 +37,10 @@ public class ChatopBackApplication {
 		};
 	}
 
-	/**
-	 * Configuration du DataSource pour la connexion à la base de données.
-	 */
+	private void printEnvVariable(String name, String value) {
+		System.out.println(name + " : " + value);
+	}
+
 	@Bean
 	public DataSource dataSource() {
 		return DataSourceBuilder.create()

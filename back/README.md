@@ -25,9 +25,9 @@ Before you begin, ensure you have the following installed on your machine:
 
    ```plaintext
    DATABASE_URL=jdbc:mysql://localhost:3306/rental?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-   DATABASE_USERNAME=root
-   DATABASE_PASSWORD=MySQL2025!
-   JWT_SECRET=JWT_SECRET2025!JWT_SECRET2025!JWT_SECRET2025!
+   DATABASE_USERNAME=ChatopUser
+   DATABASE_PASSWORD=ChatopDB2025!
+   JWT_SECRET=1Ux6Dnxnx1mfnAM1aQFf+fzMoUuyitQCXTEIHfgTklg=
    ```
 
 3. **Ensure the MySQL server is running and accessible at the specified `DATABASE_URL`.**
