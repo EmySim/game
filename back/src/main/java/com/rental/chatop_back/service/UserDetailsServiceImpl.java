@@ -6,46 +6,44 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
- * Service pour charger les détails de l'utilisateur pour l'authentification.
+ * Service for loading user details for authentication.
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private static final Logger logger = Logger.getLogger(UserDetailsServiceImpl.class.getName());
-    
-    @Autowired
+
     private final UserRepository userRepository;
 
+    /**
+     * Constructor injection for UserRepository.
+     */
     public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) {
-        logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        logger.info("🔍 Searching for user with email: " + email);
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
+
         if (optionalUser.isEmpty()) {
-            logger.warning("Utilisateur non trouvé avec l'email : " + email);
-            throw new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email);
+            logger.warning("User not found with email: " + email);
+            throw new UsernameNotFoundException("User not found with email: " + email);
         }
 
         User user = optionalUser.get();
-        logger.info("Utilisateur trouvé : " + user.getEmail());
+        logger.info("✅ User found: " + user.getEmail());
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                Collections.emptyList() // Pas de rôles pour l'instant
-        );
+        // La classe `User` doit implémenter `UserDetails`
+        return user;
     }
 }

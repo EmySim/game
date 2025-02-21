@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -23,15 +22,17 @@ import java.util.logging.Logger;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtAuthenticationFilter.class.getName());
+
     private final com.rental.chatop_back.service.JwtService jwtService;
-    
-    @Autowired
     private final UserDetailsService userDetailsService;
 
     /**
      * Constructeur avec injection des dépendances.
+     * @param jwtService Service JWT pour validation et extraction de données
+     * @param userDetailsService Service pour charger les détails de l'utilisateur
      */
-    public JwtAuthenticationFilter(com.rental.chatop_back.service.JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(com.rental.chatop_back.service.JwtService jwtService,
+                                   UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
@@ -40,46 +41,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        String requestURI = request.getRequestURI();
-        logger.info("Requête entrante : " + requestURI);
-
-        // Récupération de l'en-tête Authorization
+        // Récupérer l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
 
-        // Si aucun token ou mauvais format, passer au filtre suivant (ex: authentification)
+        // Si aucun token ou mauvais format, passer au filtre suivant
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extraction du token (on supprime "Bearer ")
+        // Extraction du token
         String token = authHeader.substring(7);
         logger.info("Token reçu : " + token);
 
         try {
             // Extraction du nom d'utilisateur depuis le token
             String username = jwtService.extractUsername(token);
+
+            // Charger les détails de l'utilisateur
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            // Validation du token
+
+            // Valider le token
             jwtService.validateToken(token, userDetails);
 
-            // Création de l'authentification et stockage dans le contexte de sécurité
+            // Créer une authentification basée sur les détails de l'utilisateur
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
+
+            // Assigner l'authentification au contexte de sécurité
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            logger.info("Utilisateur authentifié : " + username);
+            logger.info("✅ Authentification réussie pour : " + username);
 
         } catch (RuntimeException e) {
-            logger.severe("Erreur lors de la validation du token : " + e.getMessage());
+            logger.severe("❌ Erreur de validation du token : " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Erreur : " + e.getMessage());
             return;
         }
 
-        logger.info("JWT Filter terminé, passage au filtre suivant.");
+        logger.info("✔️ Passage au filtre suivant.");
         filterChain.doFilter(request, response);
     }
 }

@@ -7,22 +7,41 @@ import java.util.Date;
  * Entity class representing a rental property.
  */
 @Entity
+@Table(name = "rentals") // Définir le nom de la table pour la base de données
 public class Rental {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Génération automatique de l'ID
     private Long id;
 
+    @Column(nullable = false) // Nom requis non null
     private String name;
+
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private double price;
+
+    @Column(nullable = false)
     private String location;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date();
+    @Temporal(TemporalType.TIMESTAMP) // Pour les champs de type Date
+    private Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt = new Date();
+    private Date updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Date();
+    }
 
     // Getters et setters
     public Long getId() { return id; }

@@ -1,26 +1,16 @@
 package com.rental.chatop_back.entity;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Entity class representing a user in the system.
@@ -47,30 +37,30 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;  // Valeur par défaut ROLE.USER
+    private Role role;
 
-    // **IMPORTANT** : Constructeur par défaut requis par Hibernate
-    public User() {
-        this.role = Role.USER; // Valeur par défaut (ROLE.USER)
-    }
+    /**
+     * Default constructor (required by Hibernate).
+     */
+    public User() {}
 
-    // Constructeur pour un nouvel utilisateur
-    public User(String email, String name, String password) {
-        this.email = email;
-        this.name = name;
-        this.password = password;
-        this.role = Role.USER;
-    }
-
-    // Nouveau constructeur pour accepter un paramètre Role
+    /**
+     * Constructor for creating a user with a specific role.
+     * This is a full parameterized constructor.
+     *
+     * @param email    The user's email (must be unique and valid).
+     * @param name     The user's name (maximum 100 characters).
+     * @param password The user's hashed password.
+     * @param role     The role assigned to the user.
+     */
     public User(String email, String name, String password, Role role) {
         this.email = email;
         this.name = name;
@@ -78,19 +68,35 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    // Préparation avant persistance dans la base de données
+    /**
+     * Constructor for creating a user without explicitly specifying a role.
+     * The role will default to `USER`.
+     *
+     * @param email    The user's email (must be unique and valid).
+     * @param name     The user's name (maximum 100 characters).
+     * @param password The user's hashed password.
+     */
+    public User(String email, String name, String password) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+
+        // Assign default role if none is specified
+        this.role = Role.USER; // Assuming `USER` is the default role
+    }
+
+    // Auto-setting timestamps for database persistence
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = createdAt;
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters et Setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -113,34 +119,35 @@ public class User implements UserDetails {
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
-    // Implémentation de UserDetails
+    // Implementing `UserDetails` methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        // Maps the user's role to a `GrantedAuthority` (e.g., "ROLE_USER")
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.email; // Username is the email in this system.
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Toujours actif
+        return true; // Account expiration not implemented.
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Toujours non bloqué
+        return true; // Locking accounts not implemented.
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Toujours valide
+        return true; // Credential expiration not implemented.
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // Toujours activé
+        return true; // User is always enabled in this implementation.
     }
 }

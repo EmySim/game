@@ -8,8 +8,8 @@ public class DBConnectionTest {
 
     public static void main(String[] args) {
         // Paramètres de connexion JDBC
-        String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/rental?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        String username = "ChatopUser"; // Nom d'utilisateur MySQL
+        String jdbcUrl = "jdbc:mysql://localhost:3306/chatopdb";
+        String username = "chatop_user"; // Nom d'utilisateur MySQL
         String password = "ChatopDB2025!";
 
         try {

@@ -24,7 +24,7 @@ Before you begin, ensure you have the following installed on your machine:
 2. **Create a `.env` file in the root directory and add the following environment variables:**
 
    ```plaintext
-   DATABASE_URL=jdbc:mysql://localhost:3306/rental?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+   DATABASE_URL=jdbc:mysql://localhost:3306/chatopdb
    DATABASE_USERNAME=ChatopUser
    DATABASE_PASSWORD=ChatopDB2025!
    JWT_SECRET=1Ux6Dnxnx1mfnAM1aQFf+fzMoUuyitQCXTEIHfgTklg=
