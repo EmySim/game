@@ -3,122 +3,46 @@ package com.rental.chatop_back.service;
 import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-/**
- * Service for handling user-related operations.
- */
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private static final Logger logger = Logger.getLogger(UserService.class.getName());
-    private static final String EMAIL_ALREADY_USED_ERROR = "Cet email est déjà utilisé.";
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Registers a new user.
-     *
-     * @param userDTO The user to be registered.
-     */
-    public void register(UserDTO userDTO) {
-        try {
-            validateEmailUniqueness(userDTO.getEmail());
-            User user = convertToEntity(userDTO);
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepository.save(user);
-            logger.info("Utilisateur enregistré avec succès : " + user.getEmail());
-        } catch (IllegalArgumentException e) {
-            logger.warning("Erreur lors de l'enregistrement de l'utilisateur : " + e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            logger.severe("Erreur inattendue lors de l'enregistrement de l'utilisateur : " + e.getMessage());
-            throw new RuntimeException("Erreur inattendue lors de l'enregistrement de l'utilisateur", e);
-        }
-    }
-
-    /**
-     * Validates the uniqueness of the email.
-     *
-     * @param email The email to be validated.
-     */
-    private void validateEmailUniqueness(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException(EMAIL_ALREADY_USED_ERROR);
-        }
-    }
-
-    /**
-     * Finds a user by email.
-     *
-     * @param email The email of the user.
-     * @return Optional containing the user if found, empty otherwise.
-     */
     public Optional<User> findByEmail(String email) {
+        logger.info("Recherche de l'utilisateur avec l'email : " + email);
         return userRepository.findByEmail(email);
     }
 
-    /**
-     * Loads a user by username (email).
-     *
-     * @param email The email of the user.
-     * @return UserDetails containing the user details.
-     * @throws UsernameNotFoundException if the user is not found.
-     */
-    @Override
-    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) {
-        logger.info("🔍 Recherche de l'utilisateur avec l'email : " + email);
+    public void register(UserDTO userDTO) {
+        logger.info("Début de la méthode register pour l'email : " + userDTO.getEmail());
 
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-            logger.warning("Utilisateur non trouvé avec l'email : " + email);
-            throw new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email);
+        try {
+            if (userRepository.existsByEmail(userDTO.getEmail())) {
+                logger.warning("Échec de l'inscription : email déjà utilisé - " + userDTO.getEmail());
+                throw new RuntimeException("Email déjà utilisé !");
+            }
+
+            User user = new User(userDTO.getEmail(), userDTO.getName(), passwordEncoder.encode(userDTO.getPassword()));
+            userRepository.save(user);
+            logger.info("Utilisateur créé avec succès : " + userDTO.getEmail());
+        } catch (Exception e) {
+            logger.severe("Erreur lors de l'inscription de l'utilisateur : " + e.getMessage());
+            throw new RuntimeException("Erreur lors de l'inscription de l'utilisateur", e);
         }
-
-        User user = optionalUser.get();
-        logger.info("Utilisateur trouvé : " + user.getEmail());
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                Collections.emptyList() // Pas de rôles dans cet exemple
-        );
     }
-    /**
-     * Converts a UserDTO to a User entity.
-     *
-     * @param userDTO The UserDTO to be converted.
-     * @return The converted User entity.
-     */
-    private User convertToEntity(UserDTO userDTO) {
-        return new User(userDTO.getEmail(), userDTO.getName(), userDTO.getPassword());
-    }
-    /**
-     * Retrieves user details by ID.
-     *
-     * @param id The ID of the user to retrieve.
-     * @return UserDTO containing the user details.
-     */
-    public UserDTO getUserDetailsById(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            return null;
-        }
-        User user = optionalUser.get();
-        return new UserDTO(user.getEmail(), user.getName(), user.getPassword());
-    }
-
 }

@@ -1,52 +1,109 @@
 package com.rental.chatop_back;
 
+import javax.sql.DataSource;
+
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
 public class ChatopBackApplication {
+
+	/**
+	 * Point d'entrée principal pour démarrer l'application Spring Boot.
+	 */
 	public static void main(String[] args) {
-
-		// Charger les variables d'environnement depuis le fichier `.env`
-		Dotenv dotenv = Dotenv.configure()
-				.directory("./") // Spécifie l'emplacement du fichier .env (racine du projet)
-				.load();
-
-		// Récupérer les variables d'environnement
-		String databaseUrl = dotenv.get("DATABASE_URL");
-		String databaseUsername = dotenv.get("DATABASE_USERNAME");
-		String databasePassword = dotenv.get("DATABASE_PASSWORD");
-		String jwtSecret = dotenv.get("JWT_SECRET");
-
-		// Vérification des variables d'environnement
-		verifyEnvironmentVariable("DATABASE_URL", databaseUrl);
-		verifyEnvironmentVariable("DATABASE_USERNAME", databaseUsername);
-		verifyEnvironmentVariable("DATABASE_PASSWORD", databasePassword);
-		verifyEnvironmentVariable("JWT_SECRET", jwtSecret);
-
-		// Configurer les propriétés système pour le framework Spring
-		System.setProperty("spring.datasource.url", databaseUrl);
-		System.setProperty("spring.datasource.username", databaseUsername);
-		System.setProperty("spring.datasource.password", databasePassword);
-
-		// Log statement to indicate successful loading of environment variables
-		System.out.println("Environment variables loaded successfully1.");
-
-		// Démarrer l'application Spring Boot
 		SpringApplication.run(ChatopBackApplication.class, args);
 	}
 
+	// ==========================================================
+	// Configuration des variables d'environnement (recommandé)
+	// ==========================================================
+	// Les annotations @Value injectent automatiquement les propriétés
+	// définies dans l'environnement ou le fichier configuration (application.properties).
+	@Value("${DATABASE_URL}")
+	private String databaseUrl;
+
+	@Value("${DATABASE_USERNAME}")
+	private String databaseUsername;
+
+	@Value("${DATABASE_PASSWORD}")
+	private String databasePassword;
+
+	@Value("${JWT_SECRET}")
+	private String jwtSecret;
+
+	@Value("${JWT_EXPIRATION}")
+	private long jwtExpiration;
+
 	/**
-	 * Méthode pour vérifier qu'une variable d'environnement est bien définie et non vide.
-	 * Si une variable est absente ou vide, le programme s'arrête.
+	 * Bean pour l'exécution au démarrage de l'application.
+	 * Vérifie que les variables d'environnement essentielles sont présentes
+	 * et correctement initialisées avant que l'application ne démarre pleinement.
 	 *
-	 * @param variableName  Nom de la variable (pour l'affichage dans l'erreur).
-	 * @param variableValue Valeur de la variable à vérifier.
+	 * @return CommandLineRunner, une fonction qui s'exécute après le démarrage du contexte Spring.
 	 */
-	private static void verifyEnvironmentVariable(String variableName, String variableValue) {
-		if (variableValue == null || variableValue.isEmpty()) {
-			throw new IllegalStateException("ERREUR : La variable d'environnement '" + variableName + "' est manquante ou vide. Veuillez la configurer correctement !");
+	@Bean
+	public CommandLineRunner diagnosticRunner() {
+		return args -> {
+			System.out.println("=== Vérification des variables de configuration ===");
+
+			try {
+				printEnvVariable("DATABASE_URL", databaseUrl);
+				printEnvVariable("DATABASE_USERNAME", databaseUsername);
+				printEnvVariable("DATABASE_PASSWORD", obfuscate(databasePassword));
+				printEnvVariable("JWT_SECRET", obfuscate(jwtSecret));
+				printEnvVariable("JWT_EXPIRATION", jwtExpiration + " ms");
+
+				System.out.println("TOUTES LES VARIABLES SONT PRÉSENTES ET VALIDÉES !");
+			} catch (Exception e) {
+				// Affiche une erreur descriptive si une variable manque ou est mal configurée
+				System.err.println("Erreur de configuration : " + e.getMessage());
+				System.exit(1); // Arrête l'application
+			}
+		};
+	}
+
+	/**
+	 * Bean manuel pour la configuration du DataSource.
+	 * NOTE : Ce bean n'est nécessaire que pour les cas où les propriétés
+	 * ne sont pas suffisantes. Dans des scénarios normaux, il est préférable
+	 * de laisser Spring Boot configurer automatiquement le DataSource.
+	 *
+	 * @return DataSource configuré.
+	 */
+	@Bean
+	public DataSource dataSource() {
+		return DataSourceBuilder.create()
+				.url(databaseUrl)
+				.username(databaseUsername)
+				.password(databasePassword)
+				.build();
+	}
+
+	/**
+	 * Permet d'afficher une variable avec son nom.
+	 *
+	 * @param name  Nom de la variable d'environnement.
+	 * @param value Valeur actuelle (affichée en clair ou masquée dans le cas de mots de passe/secrets).
+	 */
+	private void printEnvVariable(String name, String value) {
+		System.out.println(name + " : " + value);
+	}
+
+	/**
+	 * Masque une chaîne de caractères sensible pour éviter qu'elle ne soit affichée en clair.
+	 *
+	 * @param value La valeur à masquer.
+	 * @return Une version masquée de la valeur (ex. : "******").
+	 */
+	private String obfuscate(String value) {
+		if (value == null || value.isEmpty()) {
+			return "NON FOURNIE";
 		}
+		return "*".repeat(value.length());
 	}
 }

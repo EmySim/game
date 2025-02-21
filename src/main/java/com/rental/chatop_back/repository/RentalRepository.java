@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * Repository interface for Rental entity.
+ * No additional methods needed for basic CRUD operations.
  */
 public interface RentalRepository extends JpaRepository<Rental, Long> {
-    // No additional methods needed for GET /api/rentals
+    // JpaRepository already provides the necessary methods (findById, save, deleteById, etc.)
 }

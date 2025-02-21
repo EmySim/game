@@ -24,13 +24,13 @@ Before you begin, ensure you have the following installed on your machine:
 2. **Create a `.env` file in the root directory and add the following environment variables:**
 
    ```plaintext
-   DATABASE_URL=jdbc:mysql://localhost:3306/rental?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-   DATABASE_USERNAME=root
-   DATABASE_PASSWORD=MySQL2025!
-   JWT_SECRET=JWT_SECRET2025!JWT_SECRET2025!JWT_SECRET2025!
+   DATABASE_URL=jdbc:mysql://localhost:3306/chatopdb
+   DATABASE_USERNAME=ChatopUser
+   DATABASE_PASSWORD=ChatopDB2025!
+   JWT_SECRET=1Ux6Dnxnx1mfnAM1aQFf+fzMoUuyitQCXTEIHfgTklg=
    ```
 
-3. **Update the `application.properties` file in `src/main/resources` with your database configuration:**
+3. **Ensure the MySQL server is running and accessible at the specified `DATABASE_URL`.**
 
    ```properties
    spring.datasource.url=${DATABASE_URL}
@@ -81,4 +81,4 @@ If you wish to contribute to this project, please follow these steps:
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.

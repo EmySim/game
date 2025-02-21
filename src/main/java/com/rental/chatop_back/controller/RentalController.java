@@ -3,6 +3,7 @@ package com.rental.chatop_back.controller;
 import com.rental.chatop_back.entity.Rental;
 import com.rental.chatop_back.service.RentalService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,7 @@ public class RentalController {
             return ResponseEntity.ok(rentals);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Erreur lors de la récupération des locations", e);
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);  // Ajoute un message d'erreur ici si tu veux plus de détails
         }
     }
 }

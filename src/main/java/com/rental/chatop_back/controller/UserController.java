@@ -1,18 +1,25 @@
 package com.rental.chatop_back.controller;
 
 import com.rental.chatop_back.dto.UserDTO;
-import com.rental.chatop_back.service.UserService;
+import com.rental.chatop_back.service.UserServiceDetail;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final UserService userService;
+    private static final Logger logger = Logger.getLogger(UserController.class.getName());
+    private final UserServiceDetail userServiceDetail;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserServiceDetail userServiceDetail) {
+        this.userServiceDetail = userServiceDetail;
     }
 
     /**
@@ -23,10 +30,14 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserDetails(@PathVariable Long id) {
-        UserDTO userDTO = userService.getUserDetailsById(id);
+        logger.info("Incoming request to get user details for ID: " + id);
+        UserDTO userDTO = userServiceDetail.getUserDetailsById(id);
         if (userDTO == null) {
-            return ResponseEntity.notFound().build();
+            logger.warning("User not found for ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Ajout d'une réponse explicite en cas d'absence d'utilisateur
         }
-        return ResponseEntity.ok(userDTO);
+        logger.info("Successfully retrieved user details for ID: " + id);
+        return ResponseEntity.ok(new UserDTO(userDTO.getId(), userDTO.getEmail(), userDTO.getName()));
     }
+
 }

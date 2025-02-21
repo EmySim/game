@@ -1,7 +1,7 @@
 package com.rental.chatop_back.service;
 
-import com.rental.chatop_back.dto.AuthRequest;
-import com.rental.chatop_back.dto.AuthResponse;
+import com.rental.chatop_back.dto.AuthRequestDTO;
+import com.rental.chatop_back.dto.AuthResponseDTO;
 import com.rental.chatop_back.dto.UserDTO;
 import com.rental.chatop_back.entity.User;
 import com.rental.chatop_back.repository.UserRepository;
@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service for handling authentication-related operations.
+ * Service pour gérer les opérations d'authentification et d'inscription.
  */
 @Service
 public class AuthService {
@@ -34,88 +34,89 @@ public class AuthService {
     }
 
     /**
-     * Authenticates a user and generates a JWT token.
+     * Authentifie un utilisateur et génère un token JWT.
      *
-     * @param authRequest The authentication request containing email and password.
-     * @return AuthResponse containing the JWT token.
+     * @param authRequestDTO Les informations de connexion.
+     * @return Un objet AuthResponseDTO contenant le token JWT.
      */
-    public AuthResponse login(AuthRequest authRequest) {
-        logger.info("Début de la méthode login pour l'email : " + authRequest.getEmail());
+    public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
+        logger.info("Début de la méthode login pour l'email : " + authRequestDTO.getEmail());
 
         try {
+            // Authentification de l'utilisateur
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(authRequestDTO.getEmail(), authRequestDTO.getPassword())
             );
 
-            User user = userRepository.findByEmail(authRequest.getEmail())
+            // Recherche de l'utilisateur dans la base de données
+            User user = userRepository.findByEmail(authRequestDTO.getEmail())
                     .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-            String token = jwtService.generateToken(user); // Utilisation de User directement
+            // Génération du token JWT
+            String token = jwtService.generateToken(user);
 
-            logger.info("Token généré avec succès pour l'email : " + authRequest.getEmail());
-            logger.info("Fin de la méthode login");
-
-            return new AuthResponse(token);
+            logger.info("Token généré avec succès pour l'email : " + authRequestDTO.getEmail());
+            return new AuthResponseDTO(token);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Erreur lors de l'authentification de l'utilisateur : " + e.getMessage(), e);
+            logger.log(Level.SEVERE, "Erreur lors de l'authentification : " + e.getMessage(), e);
             throw new RuntimeException("Erreur lors de l'authentification de l'utilisateur", e);
         }
     }
 
     /**
-     * Registers a new user and generates a JWT token.
+     * Inscrit un nouvel utilisateur et génère un token JWT.
      *
-     * @param authRequest The registration request containing email, password, and name.
-     * @return AuthResponse containing the JWT token.
+     * @param authRequestDTO Les informations d'inscription.
+     * @return Un objet AuthResponseDTO contenant le token JWT.
      */
-    public AuthResponse register(AuthRequest authRequest) {
-        logger.info("Début de la méthode register pour l'email : " + authRequest.getEmail());
+    public AuthResponseDTO register(AuthRequestDTO authRequestDTO) {
+        logger.info("Début de la méthode register pour l'email : " + authRequestDTO.getEmail());
 
         try {
-            if (userRepository.existsByEmail(authRequest.getEmail())) {
-                logger.warning("Échec de l'inscription : email déjà utilisé - " + authRequest.getEmail());
+            // Vérification si l'email existe déjà
+            if (userRepository.existsByEmail(authRequestDTO.getEmail())) {
+                logger.warning("Échec de l'inscription : email déjà utilisé.");
                 throw new RuntimeException("Cet email est déjà utilisé.");
             }
 
+            // Création de l'utilisateur
             User user = new User(
-                    authRequest.getEmail(),
-                    authRequest.getName(),
-                    passwordEncoder.encode(authRequest.getPassword())
+                    authRequestDTO.getEmail(),
+                    authRequestDTO.getName(),
+                    passwordEncoder.encode(authRequestDTO.getPassword())
             );
 
+            // Enregistrement de l'utilisateur dans la base de données
             userRepository.save(user);
 
-            String token = jwtService.generateToken(user); // Utilisation de User directement
+            // Génération du token JWT
+            String token = jwtService.generateToken(user);
+            logger.info("Utilisateur créé avec succès : " + authRequestDTO.getEmail());
 
-            logger.info("Utilisateur créé avec succès : " + authRequest.getEmail());
-            logger.info("Fin de la méthode register");
-
-            return new AuthResponse(token);
+            return new AuthResponseDTO(token);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Erreur lors de l'inscription de l'utilisateur : " + e.getMessage(), e);
+            logger.log(Level.SEVERE, "Erreur lors de l'inscription : " + e.getMessage(), e);
             throw new RuntimeException("Erreur lors de l'inscription de l'utilisateur", e);
         }
     }
 
     /**
-     * Retrieves the details of a user by email.
+     * Récupère les détails d'un utilisateur en fonction de son email.
      *
-     * @param email The email of the user.
-     * @return UserDTO containing the user details.
+     * @param email L'email de l'utilisateur.
+     * @return Un objet UserDTO contenant les informations de l'utilisateur.
      */
     public UserDTO getUserDetails(String email) {
         logger.info("Début de la méthode getUserDetails pour l'email : " + email);
 
         try {
+            // Recherche de l'utilisateur par email
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-            logger.info("Utilisateur trouvé : " + email);
-            logger.info("Fin de la méthode getUserDetails");
-
-            return new UserDTO(user.getId(), user.getName(), user.getEmail());
+            return new UserDTO(user.getId(), user.getEmail(), user.getName());
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Erreur lors de la récupération des détails de l'utilisateur : " + e.getMessage(), e);
+            logger.log(Level.SEVERE, "Erreur lors de la récupération des détails : " + e.getMessage(), e);
             throw new RuntimeException("Erreur lors de la récupération des détails de l'utilisateur", e);
         }
     }
